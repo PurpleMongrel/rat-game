@@ -7,7 +7,6 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.4;
-blackholeSizeObj = { "x": 15, "y": 15 };
 let scrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
