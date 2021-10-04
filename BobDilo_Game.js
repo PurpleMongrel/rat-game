@@ -7,7 +7,7 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.4;
-let scrollRate = 0.01;
+let scrollRate = 0.04;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
@@ -362,8 +362,9 @@ class State {
     }
 
     return new State(
-      this.level, newCharacters,
-      "playing",
+      this.level,
+      newCharacters,
+      this.status,
       this.canvas,
       this.viewport.levelScroll
     );
@@ -383,7 +384,7 @@ class State {
     this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     let { levelScroll, height, width } = this.viewport;
     let rowPosition;
-    let radius = pixelScale/2;
+    let radius = pixelScale / 2;
 
     for (let y = height; y >= 0; y--) {
 
@@ -426,12 +427,6 @@ class State {
               }
             }
           }
-          /* if (
-            color != backgroundBlocks &&
-            color != "#409486" &&
-            color != "#ffd666" &&
-            color != "#f75b4a"
-              ) {console.log(color)} */
 
           drawBackgroundBlock(
             this.cx,
@@ -465,42 +460,20 @@ window.addEventListener("keyup", event => {
 })
 
 
-//var levelObj = new Level(levelStringPlan);
-//var levelDataStructureUnparsed = levelObj.level
-
-
-//var state = State.start(levelObj)
-//console.log(state)
 let counter = 0;
 
-function frameAnimation(timeCurrentFrame, timePreviousFrame, state) {
-  let timeElapsed = timeCurrentFrame - timePreviousFrame;
-  state = state.update(timeElapsed, state)
-  state.syncCanvas(timeElapsed, state);
-  timePreviousFrame = timeCurrentFrame;
-  let endTimer = 0;
-  if (state.status = "playing") {
-    requestAnimationFrame(newTime => frameAnimation(newTime, oldTime))
-  } else if (endTimer < 1) {
-    if (state.viewport.levelScroll > 30) {
-      requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-    }
-  } else resolve(state.status);
-}
-
-
-
-
-async function runLevel(currentLevel) {
+function runLevel(currentLevel) {
   let levelObj = new Level(currentLevel);
-  let state = await State.start(levelObj);
+  let state = State.start(levelObj);
 
   return new Promise((resolve) => {
     function frameAnimation(
       timeCurrentFrame,
       timePreviousFrame,
       state
-    ){
+    ) {
+
+      counter++;
 
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
@@ -509,12 +482,24 @@ async function runLevel(currentLevel) {
       timePreviousFrame = timeCurrentFrame;
       let endTimer = 0;
 
-      if (state.status = "playing") {
+      if (state.viewport.levelScroll < 30) {
+        state.status = "won";
+        /* state.cx.fillStyle = backgroundBlocks;
+        state.cx.fillRect(0, 0, state.canvas.width, state.canvas.height) */
+        state.canvas.remove();
+      }
+
+      if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
+
       } else if (endTimer < 1) {
+
         if (state.viewport.levelScroll > 30) {
+
           requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
         }
+
+        resolve(state.status);
       } else resolve(state.status);
     }
 
@@ -524,8 +509,13 @@ async function runLevel(currentLevel) {
 
 
 async function runGame(levelsArray) {
+
   for (let level = 0; level < levelsArray.length;) {
+    
     let status = await runLevel(levelsArray[level]);
-    if (status == "won") level++;
+    if (status == "won") {
+      level++;
+    }
   }
+  console.log("GAME WON!!!")
 }
