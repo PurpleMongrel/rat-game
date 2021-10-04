@@ -7,7 +7,7 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.4;
-let scrollRate = 0.04;
+let scrollRate = 0.02;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
@@ -371,8 +371,6 @@ class State {
   }
 
   syncCanvas(timeElapsed, state) {
-    let t = this.characters;
-    let bobDilo = this.characters.find(p => p.type == "bobDilo")
     this.drawCanvasBackground(this.level);
     for (let char of this.characters) {
       char.draw(this);
@@ -511,7 +509,7 @@ function runLevel(currentLevel) {
 async function runGame(levelsArray) {
 
   for (let level = 0; level < levelsArray.length;) {
-    
+
     let status = await runLevel(levelsArray[level]);
     if (status == "won") {
       level++;
