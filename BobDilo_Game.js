@@ -337,8 +337,9 @@ class State {
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
-    
+
     this.cx = this.canvas.getContext("2d");
+    this.scoreCx = this.scoreCanvas.getContext("2d");
 
     this.viewport = {
       levelScroll: levelScroll,
@@ -358,9 +359,9 @@ class State {
     }
 
     return new State(
-      level, 
+      level,
       canvasCharacters,
-      "playing", 
+      "playing",
       document.createElement("canvas"),
       document.createElement("canvas"),
       level.height,
@@ -389,12 +390,20 @@ class State {
 
   syncCanvas(timeElapsed, state) {
     this.drawCanvasBackground(this.level);
+    this.drawScoreCanvas();
     for (let char of this.characters) {
       char.draw(this);
     }
   }
 
+  drawScoreCanvas() {
+    this.scoreCx.font = "30px Arial";
+    this.scoreCx.fillStyle = "white"
+    this.scoreCx.fillText("Level: 0", 10, 50);
+  }
+
   drawCanvasBackground() {
+
     this.cx.fillStyle = backgroundBlocks;
     this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     let { levelScroll, height, width } = this.viewport;
