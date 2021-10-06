@@ -1,9 +1,17 @@
 body {background-color: rgb(19, 15, 32);}
-canvas {
+#canvas {
   padding-left: 0;
   padding-right: 0;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 60;
   display: block;
+}
+
+#scoreCanvas{
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  background:  #2c1c63;
 }

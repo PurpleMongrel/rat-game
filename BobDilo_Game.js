@@ -316,15 +316,28 @@ var Level = class Level {
 
 class State {
 
-  constructor(level, characters, status, canvas, levelScroll) {
+  constructor(
+    level,
+    characters,
+    status,
+    canvas,
+    scoreCanvas,
+    levelScroll,) {
 
     this.level = level;
     this.characters = characters;
     this.status = status;
     this.canvas = canvas;
+    this.scoreCanvas = scoreCanvas;
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
+    this.scoreCanvas.width = level.width * pixelScale;
+    this.scoreCanvas.height = 5 * pixelScale;
+    this.canvas.setAttribute("id", "canvas")
+    this.scoreCanvas.setAttribute("id", "scoreCanvas")
+    document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
+    
     this.cx = this.canvas.getContext("2d");
 
     this.viewport = {
@@ -345,9 +358,12 @@ class State {
     }
 
     return new State(
-      level, canvasCharacters,
-      "playing", document.createElement("canvas"),
-      level.height
+      level, 
+      canvasCharacters,
+      "playing", 
+      document.createElement("canvas"),
+      document.createElement("canvas"),
+      level.height,
     )
   }
 
@@ -366,7 +382,8 @@ class State {
       newCharacters,
       this.status,
       this.canvas,
-      this.viewport.levelScroll
+      this.scoreCanvas,
+      this.viewport.levelScroll,
     );
   }
 
@@ -463,6 +480,7 @@ let counter = 0;
 function runLevel(currentLevel) {
   let levelObj = new Level(currentLevel);
   let state = State.start(levelObj);
+  console.log(state)
 
   return new Promise((resolve) => {
     function frameAnimation(
@@ -485,6 +503,7 @@ function runLevel(currentLevel) {
         /* state.cx.fillStyle = backgroundBlocks;
         state.cx.fillRect(0, 0, state.canvas.width, state.canvas.height) */
         state.canvas.remove();
+        state.scoreCanvas.remove();
       }
 
       if (state.status == "playing") {
