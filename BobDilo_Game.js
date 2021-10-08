@@ -146,16 +146,14 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
 
       if (state.level.rows[y]) {
 
-        if (state.level.rows[y][x] != "empty" &&
-
-          state.level.rows[y][x] != "D") {
+        if (state.level.rows[y][x] != "empty"
+        /*&& state.level.rows[y][x] != "D"*/) {
 
           collisionBlocks.push({ "row": y, "column": x, "color": state.level.rows[y][x] })
         }
       }
     }
   }
-  console.log(collisionBlocks);
   return collisionBlocks;
 }
 
@@ -211,7 +209,14 @@ class Dilo {
     for (let block of collided) {
 
       if (state.level.rows[block.row][block.column] != "collided") {
-
+        /* console.log(block)
+        console.log(this.level) */
+        if (state.level.unparsedRows[block.row][block.column] == "#") {
+          state.scoreData.blocksTouched ++;
+        }
+        if (state.level.unparsedRows[block.row][block.column] == "*") {
+          state.scoreData.coinsCollected ++;
+        }
         state.level.rows[block.row][block.column] = "collided";
       }
     }
@@ -406,7 +411,7 @@ class State {
   drawScoreCanvas() {
     this.scoreCx.font = "30px Arial";
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}`, 10, 50);
+    this.scoreCx.fillText(`    Level: ${this.scoreData.level + 1}       Coins collected: ${this.scoreData.coinsCollected}       Block collisions: ${this.scoreData.blocksTouched}`, 10, 50);
   }
 
   drawCanvasBackground() {
@@ -497,7 +502,7 @@ function runLevel(currentLevel, levelIndex) {
   let levelObj = new Level(currentLevel);
   let state = State.start(levelObj, levelIndex);
 
-    console.log(state)
+  console.log(state)
 
   return new Promise((resolve) => {
     function frameAnimation(
@@ -507,7 +512,7 @@ function runLevel(currentLevel, levelIndex) {
     ) {
 
       counter++;
-
+if (counter%200 == 0) console.log(state)
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       state = state.update(timeElapsed, state)
