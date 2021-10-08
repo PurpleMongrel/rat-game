@@ -1,13 +1,10 @@
-//document.body.style.background = "black"
-
-
 let pixelScale = 20;
 let diloFigureHeight = 1.4 * pixelScale;
 let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.4;
-let scrollRate = 0.02;
+let scrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
@@ -158,6 +155,7 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
       }
     }
   }
+  console.log(collisionBlocks);
   return collisionBlocks;
 }
 
@@ -322,6 +320,7 @@ class State {
     status,
     canvas,
     scoreCanvas,
+    scoreData,
     levelScroll,) {
 
     this.level = level;
@@ -337,6 +336,7 @@ class State {
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
+    this.scoreData = scoreData;
 
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
@@ -348,7 +348,7 @@ class State {
     }
   }
 
-  static start(level) {
+  static start(level, levelIndex) {
 
     let canvasCharacters = []
 
@@ -364,6 +364,12 @@ class State {
       "playing",
       document.createElement("canvas"),
       document.createElement("canvas"),
+      {
+        coinsCollected: 0,
+        blocksTouched: 0,
+        health: 100,
+        level: levelIndex
+      },
       level.height,
     )
   }
@@ -384,6 +390,7 @@ class State {
       this.status,
       this.canvas,
       this.scoreCanvas,
+      this.scoreData,
       this.viewport.levelScroll,
     );
   }
@@ -399,7 +406,7 @@ class State {
   drawScoreCanvas() {
     this.scoreCx.font = "30px Arial";
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText("Level: 0", 10, 50);
+    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}`, 10, 50);
   }
 
   drawCanvasBackground() {
@@ -486,10 +493,11 @@ window.addEventListener("keyup", event => {
 
 let counter = 0;
 
-function runLevel(currentLevel) {
+function runLevel(currentLevel, levelIndex) {
   let levelObj = new Level(currentLevel);
-  let state = State.start(levelObj);
-  console.log(state)
+  let state = State.start(levelObj, levelIndex);
+
+    console.log(state)
 
   return new Promise((resolve) => {
     function frameAnimation(
@@ -536,11 +544,11 @@ function runLevel(currentLevel) {
 
 async function runGame(levelsArray) {
 
-  for (let level = 0; level < levelsArray.length;) {
+  for (let levelIndex = 0; levelIndex < levelsArray.length;) {
 
-    let status = await runLevel(levelsArray[level]);
+    let status = await runLevel(levelsArray[levelIndex], levelIndex);
     if (status == "won") {
-      level++;
+      levelIndex++;
     }
   }
   console.log("GAME WON!!!")
