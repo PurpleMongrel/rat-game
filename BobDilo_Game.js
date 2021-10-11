@@ -4,7 +4,7 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
-let scrollRate = 0.01;
+let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
@@ -283,7 +283,7 @@ class BlackHole {
   }
 
   update(timeElapsed, state) {
-    let newY = this.position.y += timeElapsed * scrollRate * pixelScale;
+    let newY = this.position.y += timeElapsed * state.scrollRate * pixelScale;
     return new BlackHole({ "x": this.position.x, "y": newY })
   }
 
@@ -361,7 +361,8 @@ class State {
     canvas,
     scoreCanvas,
     scoreData,
-    levelScroll,) {
+    levelScroll,
+    scrollRate) {
 
     this.level = level;
     this.characters = characters;
@@ -386,6 +387,7 @@ class State {
       height: this.canvas.height / pixelScale,
       width: this.canvas.width / pixelScale
     }
+    this.scrollRate = scrollRate;
   }
 
   static start(level, levelIndex) {
@@ -411,12 +413,13 @@ class State {
         level: levelIndex
       },
       level.height,
+      levelScrollRate
     )
   }
 
   update(timeElapsed, state) {
 
-    this.viewport.levelScroll -= timeElapsed * scrollRate;
+    this.viewport.levelScroll -= timeElapsed * state.scrollRate;
     let newCharacters = [];
 
     for (let i = 0; i < this.characters.length; i++) {
@@ -432,6 +435,7 @@ class State {
       this.scoreCanvas,
       this.scoreData,
       this.viewport.levelScroll,
+      this.scrollRate
     );
   }
 
