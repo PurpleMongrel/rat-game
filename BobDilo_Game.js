@@ -4,10 +4,12 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
-let scrollRate = 0.001;
+let scrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
+let diloAcceleration = 0.019;
+let diloMaxSpeed = 0.3;
 
 
 function sparkleEffect(
@@ -174,7 +176,7 @@ class Dilo {
   }
 
   static create({ x, y }) {
-    return new Dilo({ "x": x, "y": y }, { "x": 0, "y": 0 })
+    return new Dilo({ "x": x, "y": y }, { "up": 0, "down": 0, "left": 0, "right": 0 })
   }
 
   update(timeElapsed, state) {
@@ -182,10 +184,41 @@ class Dilo {
     let newX = this.position.x;
     let newY = this.position.y;
 
-    if (pressedKeys.ArrowRight == true) newX += timeElapsed * diloMoveRate;
-    if (pressedKeys.ArrowLeft == true) newX -= timeElapsed * diloMoveRate;
-    if (pressedKeys.ArrowUp == true) newY -= timeElapsed * diloMoveRate;
-    if (pressedKeys.ArrowDown == true) newY += timeElapsed * diloMoveRate;
+    if (pressedKeys.ArrowRight == true) {
+      if (this.speed.right < diloMaxSpeed) {
+        this.speed.right += diloAcceleration;
+      }
+      newX += timeElapsed * this.speed.right;
+    } else {
+      this.speed.right = 0;
+    }
+
+    if (pressedKeys.ArrowLeft == true) {
+      if (this.speed.left < diloMaxSpeed) {
+        this.speed.left += diloAcceleration;
+      }
+      newX -= timeElapsed * this.speed.left;
+    } else {
+      this.speed.left = 0;
+    }
+
+    if (pressedKeys.ArrowUp == true) {
+      if (this.speed.up < diloMaxSpeed) {
+        this.speed.up += diloAcceleration;
+      }
+      newY -= timeElapsed * this.speed.up;
+    } else {
+      this.speed.up = 0;
+    }
+
+    if (pressedKeys.ArrowDown == true) {
+      if (this.speed.down < diloMaxSpeed) {
+        this.speed.down += diloAcceleration;
+      }
+      newY += timeElapsed * this.speed.down;
+    } else {
+      this.speed.down = 0;
+    }
 
     //Start of Dilo canvas boundary limits    
     if (newX < diloFigureRadius) {
@@ -222,7 +255,7 @@ class Dilo {
         state.level.rows[block.row][block.column] = "collided";
       }
     }
-    return new Dilo({ "x": newX, "y": newY }, { "x": 0, "y": 0 })
+    return new Dilo({ "x": newX, "y": newY }, this.speed)
   }
 
   draw(state) {
