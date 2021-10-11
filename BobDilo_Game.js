@@ -3,8 +3,8 @@ let diloFigureHeight = 1.4 * pixelScale;
 let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
-let diloMoveRate = 0.4;
-let scrollRate = 0.01;
+let diloMoveRate = 0.05;
+let scrollRate = 0.001;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
@@ -97,8 +97,8 @@ function drawCenteredCircle(
   cx.shadowColor = shadowColor;
   cx.shadowBlur = shadowBlur;
   cx.arc(
-    xPos + pixelScale / 2,
-    yPos + pixelScale / 2,
+    xPos,
+    yPos,
     radius,
     0,
     7
@@ -134,10 +134,10 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
 
   let levelPosX = canvasPosObj.x / pixelScale;
   let levelPosY = yLevelPos(canvasPosObj.y, state.viewport.levelScroll);
-  let upperLimit = levelPosY - (sizeObj.y / pixelScale);
-  let lowerLimit = levelPosY + (sizeObj.y / pixelScale);
-  let leftLimit = levelPosX - (sizeObj.x / pixelScale);
-  let rightLimit = levelPosX + (sizeObj.x / pixelScale);
+  let upperLimit = levelPosY - sizeObj.y / pixelScale;
+  let lowerLimit = levelPosY + 15 / 20;
+  let leftLimit = levelPosX - 15 / 20;
+  let rightLimit = levelPosX + 15 / 20;
   let collisionBlocks = [];
 
   for (let y = Math.floor(upperLimit); y < Math.ceil(lowerLimit); y++) {
@@ -187,6 +187,7 @@ class Dilo {
     if (pressedKeys.ArrowUp == true) newY -= timeElapsed * diloMoveRate;
     if (pressedKeys.ArrowDown == true) newY += timeElapsed * diloMoveRate;
 
+    //Start of Dilo canvas boundary limits    
     if (newX < diloFigureRadius) {
       newX = diloFigureRadius;
     }
@@ -199,6 +200,7 @@ class Dilo {
     if (newY > state.canvas.height - diloFigureRadius) {
       newY = state.canvas.height - diloFigureRadius
     };
+    //End of Dilo canvas boundary limits
 
     let collided = backgroundCollision(
       { "x": newX, "y": newY },
@@ -212,10 +214,10 @@ class Dilo {
         /* console.log(block)
         console.log(this.level) */
         if (state.level.unparsedRows[block.row][block.column] == "#") {
-          state.scoreData.blocksTouched ++;
+          state.scoreData.blocksTouched++;
         }
         if (state.level.unparsedRows[block.row][block.column] == "*") {
-          state.scoreData.coinsCollected ++;
+          state.scoreData.coinsCollected++;
         }
         state.level.rows[block.row][block.column] = "collided";
       }
@@ -409,9 +411,9 @@ class State {
   }
 
   drawScoreCanvas() {
-    this.scoreCx.font = "30px Arial";
+    this.scoreCx.font = this.level.width / 1.2 + `px Arial`;
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`    Level: ${this.scoreData.level + 1}       Coins collected: ${this.scoreData.coinsCollected}       Block collisions: ${this.scoreData.blocksTouched}`, 10, 50);
+    this.scoreCx.fillText(`  Level: ${this.scoreData.level + 1}    Coins collected: ${this.scoreData.coinsCollected}    Block collisions: ${this.scoreData.blocksTouched}`, 10, 50);
   }
 
   drawCanvasBackground() {
@@ -440,7 +442,7 @@ class State {
 
             if (color == charKey["*"]) {
               shape = "circle";
-              radius = pixelScale / 2.2;
+              radius = pixelScale / 2;
             }
 
             if (color == charKey["#"]) {
@@ -450,11 +452,13 @@ class State {
 
             if (color == "collided") {
 
-              if (this.level.unparsedRows[pixelRow][x] == "*") {
+              //May not be neededQuesaWhy d
+
+              /* if (this.level.unparsedRows[pixelRow][x] == "*") {
                 shape = "circle";
                 color = "rgba(0, 0, 0, 0)";
-                radius = pixelScale / 2.2;
-              }
+                radius = pixelScale / 2;
+              } */
 
               if (this.level.unparsedRows[pixelRow][x] == "#") {
                 shape = "square";
@@ -512,7 +516,7 @@ function runLevel(currentLevel, levelIndex) {
     ) {
 
       counter++;
-if (counter%200 == 0) console.log(state)
+      if (counter % 200 == 0) console.log(state)
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       state = state.update(timeElapsed, state)
