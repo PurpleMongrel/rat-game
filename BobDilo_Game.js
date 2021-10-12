@@ -4,11 +4,14 @@ let diloFigureWidth = 1.5 * pixelScale;
 let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
+let originaldiloMoveRate = 0.05;
 let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
+let originalDiloColor = "#f07373";
 let diloAcceleration = 0.019;
+let originalDiloAcceleration = 0.019;
 let diloMaxSpeed = 0.3;
 
 
@@ -248,6 +251,10 @@ class Dilo {
         console.log(this.level) */
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
+          if (state.scoreData.blocksTouched > 9) {
+            state.status = "lost";
+
+          }
         }
         if (state.level.unparsedRows[block.row][block.column] == "*") {
           state.scoreData.coinsCollected++;
@@ -544,7 +551,7 @@ function runLevel(currentLevel, levelIndex) {
   let state = State.start(levelObj, levelIndex);
 
   console.log(state)
-
+  let endTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
       timeCurrentFrame,
@@ -559,7 +566,6 @@ function runLevel(currentLevel, levelIndex) {
       state = state.update(timeElapsed, state)
       state.syncCanvas(timeElapsed, state);
       timePreviousFrame = timeCurrentFrame;
-      let endTimer = 0;
 
       if (state.viewport.levelScroll < 30) {
         state.status = "won";
@@ -573,14 +579,24 @@ function runLevel(currentLevel, levelIndex) {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
       } else if (endTimer < 1) {
-
+        if (state.status == "lost") {
+          diloColor = "white"
+          state.scrollRate = levelScrollRate * 0.5;
+        }
+        endTimer += 0.01;
+        console.log(endTimer)
         if (state.viewport.levelScroll > 30) {
 
           requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
         }
 
+        //resolve(state.status);
+      } else {
+        diloColor = originalDiloColor;
+        state.canvas.remove();
+        state.scoreCanvas.remove();
         resolve(state.status);
-      } else resolve(state.status);
+      }
     }
 
     requestAnimationFrame(newTime => frameAnimation(newTime, oldTime = newTime, state))
@@ -591,7 +607,7 @@ function runLevel(currentLevel, levelIndex) {
 async function runGame(levelsArray) {
 
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
-
+    console.log(8888888)
     let status = await runLevel(levelsArray[levelIndex], levelIndex);
     if (status == "won") {
       levelIndex++;
