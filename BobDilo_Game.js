@@ -5,14 +5,14 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
+let levelScrollRate = 0.005;
 let redBlock = "#f75b4a";
 let backgroundBlocks = "#191038";
 let diloColor = "#f07373";
 let originalDiloColor = "#f07373";
-let diloAcceleration = 0.019;
-let originalDiloAcceleration = 0.019;
-let diloMaxSpeed = 0.3;
+let diloAcceleration = 0.005;
+let originalDiloAcceleration = 0.005;
+let diloMaxSpeed = 0.2;
 
 
 function sparkleEffect(
@@ -191,37 +191,38 @@ class Dilo {
       if (this.speed.right < diloMaxSpeed) {
         this.speed.right += diloAcceleration;
       }
-      newX += timeElapsed * this.speed.right;
-    } else {
-      this.speed.right = 0;
+    } else if (this.speed.right > 0) {
+      this.speed.right -= diloAcceleration;
     }
 
     if (pressedKeys.ArrowLeft == true) {
       if (this.speed.left < diloMaxSpeed) {
         this.speed.left += diloAcceleration;
       }
-      newX -= timeElapsed * this.speed.left;
-    } else {
-      this.speed.left = 0;
+    } else if (this.speed.left > 0) {
+      this.speed.left -= diloAcceleration;
     }
 
     if (pressedKeys.ArrowUp == true) {
       if (this.speed.up < diloMaxSpeed) {
         this.speed.up += diloAcceleration;
       }
-      newY -= timeElapsed * this.speed.up;
-    } else {
-      this.speed.up = 0;
+    } else if (this.speed.up > 0) {
+      this.speed.up -= diloAcceleration;
     }
 
     if (pressedKeys.ArrowDown == true) {
       if (this.speed.down < diloMaxSpeed) {
         this.speed.down += diloAcceleration;
       }
-      newY += timeElapsed * this.speed.down;
-    } else {
-      this.speed.down = 0;
+    } else if (this.speed.down > 0) {
+      this.speed.down -= diloAcceleration;
     }
+
+    newX += timeElapsed * this.speed.right;
+    newX -= timeElapsed * this.speed.left;
+    newY -= timeElapsed * this.speed.up;
+    newY += timeElapsed * this.speed.down;
 
     //Start of Dilo canvas boundary limits    
     if (newX < diloFigureRadius) {
@@ -251,7 +252,7 @@ class Dilo {
         console.log(this.level) */
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
-          if (state.scoreData.blocksTouched > 9) {
+          if (state.scoreData.blocksTouched > 100) {
             state.status = "lost";
 
           }
@@ -571,24 +572,24 @@ function runLevel(currentLevel, levelIndex) {
         state.status = "won";
         /* state.cx.fillStyle = backgroundBlocks;
         state.cx.fillRect(0, 0, state.canvas.width, state.canvas.height) */
-        state.canvas.remove();
-        state.scoreCanvas.remove();
+        //state.canvas.remove();
+        //state.scoreCanvas.remove();
       }
-
+console.log(`endTimer: ${endTimer}`)
       if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
       } else if (endTimer < 1) {
         if (state.status == "lost") {
           diloColor = "white"
-          state.scrollRate = levelScrollRate * 0.5;
+          
         }
+        state.scrollRate = 0;
         endTimer += 0.01;
         console.log(endTimer)
-        if (state.viewport.levelScroll > 30) {
-
+  
           requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-        }
+        
 
         //resolve(state.status);
       } else {
@@ -605,11 +606,11 @@ function runLevel(currentLevel, levelIndex) {
 
 
 async function runGame(levelsArray) {
-
+console.log(levelsArray.length)
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
-    console.log(8888888)
     let status = await runLevel(levelsArray[levelIndex], levelIndex);
     if (status == "won") {
+      console.log(`FOMOO`)
       levelIndex++;
     }
   }
