@@ -5,14 +5,21 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.005;
+let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
-let backgroundBlocks = "#191038";
+let backgroundColors = { 
+  0: "#191038", 
+  1: "#346557", 
+  2: "#3c4e72" 
+};
+let backgroundBlocks;
 let diloColor = "#f07373";
 let originalDiloColor = "#f07373";
-let diloAcceleration = 0.005;
-let originalDiloAcceleration = 0.005;
-let diloMaxSpeed = 0.2;
+let diloAcceleration = 0.02;
+let originalDiloAcceleration = 0.02;
+let diloDeceleration = 0.02;
+let diloMaxSpeed = 0.3;
+var charKey;
 
 
 function sparkleEffect(
@@ -192,7 +199,7 @@ class Dilo {
         this.speed.right += diloAcceleration;
       }
     } else if (this.speed.right > 0) {
-      this.speed.right -= diloAcceleration;
+      this.speed.right = Math.max(this.speed.right - diloDeceleration, 0);
     }
 
     if (pressedKeys.ArrowLeft == true) {
@@ -200,7 +207,7 @@ class Dilo {
         this.speed.left += diloAcceleration;
       }
     } else if (this.speed.left > 0) {
-      this.speed.left -= diloAcceleration;
+      this.speed.left = Math.max(this.speed.left - diloDeceleration, 0);;
     }
 
     if (pressedKeys.ArrowUp == true) {
@@ -208,7 +215,7 @@ class Dilo {
         this.speed.up += diloAcceleration;
       }
     } else if (this.speed.up > 0) {
-      this.speed.up -= diloAcceleration;
+      this.speed.up = Math.max(this.speed.up - diloDeceleration, 0);;
     }
 
     if (pressedKeys.ArrowDown == true) {
@@ -216,7 +223,7 @@ class Dilo {
         this.speed.down += diloAcceleration;
       }
     } else if (this.speed.down > 0) {
-      this.speed.down -= diloAcceleration;
+      this.speed.down = Math.max(this.speed.down - diloDeceleration, 0);;
     }
 
     newX += timeElapsed * this.speed.right;
@@ -252,7 +259,7 @@ class Dilo {
         console.log(this.level) */
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
-          if (state.scoreData.blocksTouched > 100) {
+          if (state.scoreData.blocksTouched > 5) {
             state.status = "lost";
 
           }
@@ -318,14 +325,34 @@ class BlackHole {
 }
 
 
-var charKey = {
-  "#": "#409486",
-  "*": "#ffd666",
-  ".": "empty",
-  "D": Dilo,
-  "b": BlackHole
-};
 
+
+var charKeys = {
+  0: {
+    "#": "#409486",
+    "*": "#ffd666",
+    ".": "empty",
+    "D": Dilo,
+    "b": BlackHole
+  },
+  1: {
+    "#": "#b375ff",
+    "*": "#ffd666",
+    "#": "#ffffcc",
+    "*": "#ffd666",
+    ".": "empty",
+    "D": Dilo,
+    "b": BlackHole
+  }
+  ,
+  2: {
+    "#": "#ffffcc",
+    "*": "#ffd666",
+    ".": "empty",
+    "D": Dilo,
+    "b": BlackHole
+  }
+}
 
 var charTypes = {
   "bobDilo": Dilo,
@@ -548,8 +575,10 @@ window.addEventListener("keyup", event => {
 let counter = 0;
 
 function runLevel(currentLevel, levelIndex) {
+  charKey = charKeys[levelIndex];
   let levelObj = new Level(currentLevel);
   let state = State.start(levelObj, levelIndex);
+  backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
   let endTimer = 0;
@@ -569,27 +598,27 @@ function runLevel(currentLevel, levelIndex) {
       timePreviousFrame = timeCurrentFrame;
 
       if (state.viewport.levelScroll < 30) {
-        state.status = "won";
+        if (state.scoreData.coinsCollected < 10) {
+          state.status = "lost"
+        } else state.status = "won";
         /* state.cx.fillStyle = backgroundBlocks;
         state.cx.fillRect(0, 0, state.canvas.width, state.canvas.height) */
         //state.canvas.remove();
         //state.scoreCanvas.remove();
       }
-console.log(`endTimer: ${endTimer}`)
       if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
       } else if (endTimer < 1) {
         if (state.status == "lost") {
           diloColor = "white"
-          
+
         }
         state.scrollRate = 0;
         endTimer += 0.01;
-        console.log(endTimer)
-  
-          requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-        
+
+        requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
+
 
         //resolve(state.status);
       } else {
@@ -606,11 +635,9 @@ console.log(`endTimer: ${endTimer}`)
 
 
 async function runGame(levelsArray) {
-console.log(levelsArray.length)
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray[levelIndex], levelIndex);
     if (status == "won") {
-      console.log(`FOMOO`)
       levelIndex++;
     }
   }
