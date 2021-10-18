@@ -556,6 +556,18 @@ class State {
 }
 
 
+function levelStartCanvas(levelIndex, level) {
+  let startCanvas = document.createElement("canvas");
+  startCanvas.width = level.width * pixelScale;
+  startCanvas.height = 30 * pixelScale;
+  startCanvas.style.background = "red";
+  document.body.appendChild(startCanvas);
+  let startTime = time;
+  while (time < startTime + 50){
+  }
+  startCanvas.remove();
+}
+
 window.addEventListener("keydown", event => {
   if (pressedKeys.hasOwnProperty(event.key)) {
     pressedKeys[event.key] = true;
@@ -577,6 +589,7 @@ let counter = 0;
 function runLevel(currentLevel, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(currentLevel);
+  levelStartCanvas(levelIndex, levelObj)
   let state = State.start(levelObj, levelIndex);
   backgroundBlocks = backgroundColors[levelIndex]
 
