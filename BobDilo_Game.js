@@ -5,7 +5,7 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
+let levelScrollRate = 0.04;
 let redBlock = "#f75b4a";
 let backgroundColors = { 
   0: "#191038", 
@@ -20,6 +20,8 @@ let originalDiloAcceleration = 0.02;
 let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
+let coinsNeededToWin = 0;
+let blockCollisionMax = 100;
 
 
 function sparkleEffect(
@@ -259,7 +261,7 @@ class Dilo {
         console.log(this.level) */
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
-          if (state.scoreData.blocksTouched > 5) {
+          if (state.scoreData.blocksTouched > blockCollisionMax) {
             state.status = "lost";
 
           }
@@ -413,6 +415,7 @@ class State {
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
     this.scoreData = scoreData;
+    this.levelIntroDone = false;
 
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
@@ -475,17 +478,29 @@ class State {
   }
 
   syncCanvas(timeElapsed, state) {
-    this.drawCanvasBackground(this.level);
     this.drawScoreCanvas();
-    for (let char of this.characters) {
-      char.draw(this);
+    if (state.levelIntroDone == true){ 
+      this.drawCanvasBackground(this.level);
+      for (let char of this.characters) {
+        char.draw(this);
+      }
     }
+    else this.drawLevelIntroCanvas()
   }
 
   drawScoreCanvas() {
-    this.scoreCx.font = this.level.width / 1.2 + `px Arial`;
+    this.scoreCx.font = `bold 20px verdana`;
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`  Level: ${this.scoreData.level + 1}    Coins collected: ${this.scoreData.coinsCollected}    Block collisions: ${this.scoreData.blocksTouched}`, 10, 50);
+    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}  Coins collected: ${this.scoreData.coinsCollected}  Block collisions: ${this.scoreData.blocksTouched}`, 10, 50, this.canvas.width- 20);
+  }
+
+  drawLevelIntroCanvas() {
+    this.cx.fillStyle = backgroundBlocks;
+    this.cx.fillRect(0,0,this.canvas.width, this.canvas.height)
+    this.cx.font = 'bold 100px serif';
+    this.cx.textAlign = "center";
+    this.cx.strokeStyle = charKey["#"]
+    this.cx.strokeText(`Level ${this.scoreData.level + 1}`,this.canvas.width/2, this.canvas.height/4);
   }
 
   drawCanvasBackground() {
@@ -556,18 +571,6 @@ class State {
 }
 
 
-function levelStartCanvas(levelIndex, level) {
-  let startCanvas = document.createElement("canvas");
-  startCanvas.width = level.width * pixelScale;
-  startCanvas.height = 30 * pixelScale;
-  startCanvas.style.background = "red";
-  document.body.appendChild(startCanvas);
-  let startTime = time;
-  while (time < startTime + 50){
-  }
-  startCanvas.remove();
-}
-
 window.addEventListener("keydown", event => {
   if (pressedKeys.hasOwnProperty(event.key)) {
     pressedKeys[event.key] = true;
@@ -589,8 +592,8 @@ let counter = 0;
 function runLevel(currentLevel, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(currentLevel);
-  levelStartCanvas(levelIndex, levelObj)
   let state = State.start(levelObj, levelIndex);
+  let startScreenTimer = 0; 
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
@@ -602,22 +605,21 @@ function runLevel(currentLevel, levelIndex) {
       state
     ) {
 
+
       counter++;
-      if (counter % 200 == 0) console.log(state)
+      if (counter % 200 == 0) console.log(timeCurrentFrame)
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
-      state = state.update(timeElapsed, state)
+      startScreenTimer += timeElapsed;
+      if (state.levelIntroDone == true) state = state.update(timeElapsed, state)
+      if (startScreenTimer > 2000) state.levelIntroDone = true;
       state.syncCanvas(timeElapsed, state);
       timePreviousFrame = timeCurrentFrame;
 
       if (state.viewport.levelScroll < 30) {
-        if (state.scoreData.coinsCollected < 10) {
+        if (state.scoreData.coinsCollected < coinsNeededToWin) {
           state.status = "lost"
         } else state.status = "won";
-        /* state.cx.fillStyle = backgroundBlocks;
-        state.cx.fillRect(0, 0, state.canvas.width, state.canvas.height) */
-        //state.canvas.remove();
-        //state.scoreCanvas.remove();
       }
       if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
