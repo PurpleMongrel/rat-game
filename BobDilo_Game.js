@@ -487,15 +487,12 @@ class State {
     } else this.drawLevelIntroCanvas()
 
     if (this.status == "won") {
-      console.log(77777)
       this.drawLevelPassed();
     }
-
-
   }
 
   drawScoreCanvas() {
-    this.scoreCx.font = `bold 20px verdana`;
+    this.scoreCx.font = `bold 20px serif`;
     this.scoreCx.fillStyle = "white"
     this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}  Coins collected: ${this.scoreData.coinsCollected}  Block collisions: ${this.scoreData.blocksTouched}`, 10, 50, this.canvas.width - 20);
   }
