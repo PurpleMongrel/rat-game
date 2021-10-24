@@ -5,12 +5,12 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.04;
+let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
-let backgroundColors = { 
-  0: "#191038", 
-  1: "#346557", 
-  2: "#3c4e72" 
+let backgroundColors = {
+  0: "#191038",
+  1: "#346557",
+  2: "#3c4e72"
 };
 let backgroundBlocks;
 let diloColor = "#f07373";
@@ -20,7 +20,7 @@ let originalDiloAcceleration = 0.02;
 let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
-let coinsNeededToWin = 0;
+let coinsNeededToWin = 5;
 let blockCollisionMax = 100;
 
 
@@ -327,8 +327,6 @@ class BlackHole {
 }
 
 
-
-
 var charKeys = {
   0: {
     "#": "#409486",
@@ -355,6 +353,7 @@ var charKeys = {
     "b": BlackHole
   }
 }
+
 
 var charTypes = {
   "bobDilo": Dilo,
@@ -415,8 +414,6 @@ class State {
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
     this.scoreData = scoreData;
-    this.levelIntroDone = false;
-
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
 
@@ -448,7 +445,8 @@ class State {
         coinsCollected: 0,
         blocksTouched: 0,
         health: 100,
-        level: levelIndex
+        level: levelIndex,
+        levelIntroDone: false
       },
       level.height,
       levelScrollRate
@@ -478,29 +476,51 @@ class State {
   }
 
   syncCanvas(timeElapsed, state) {
+
     this.drawScoreCanvas();
-    if (state.levelIntroDone == true){ 
+
+    if (this.scoreData.levelIntroDone == true) {
       this.drawCanvasBackground(this.level);
       for (let char of this.characters) {
         char.draw(this);
       }
+    } else this.drawLevelIntroCanvas()
+
+    if (this.status == "won") {
+      console.log(77777)
+      this.drawLevelPassed();
     }
-    else this.drawLevelIntroCanvas()
+
+
   }
 
   drawScoreCanvas() {
     this.scoreCx.font = `bold 20px verdana`;
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}  Coins collected: ${this.scoreData.coinsCollected}  Block collisions: ${this.scoreData.blocksTouched}`, 10, 50, this.canvas.width- 20);
+    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}  Coins collected: ${this.scoreData.coinsCollected}  Block collisions: ${this.scoreData.blocksTouched}`, 10, 50, this.canvas.width - 20);
   }
 
   drawLevelIntroCanvas() {
     this.cx.fillStyle = backgroundBlocks;
-    this.cx.fillRect(0,0,this.canvas.width, this.canvas.height)
+    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     this.cx.font = 'bold 100px serif';
+    this.cx.lineWidth = 1.5;
     this.cx.textAlign = "center";
     this.cx.strokeStyle = charKey["#"]
-    this.cx.strokeText(`Level ${this.scoreData.level + 1}`,this.canvas.width/2, this.canvas.height/4);
+    this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
+  }
+
+  drawLevelPassed() {
+    /* this.cx.fillStyle = backgroundBlocks;
+    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height) */
+    this.cx.font = 'bold 80px serif';
+    this.cx.textAlign = "center";
+    this.cx.strokeStyle = charKey["#"]
+    this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
+    this.cx.lineWidth = 1.5;
+    this.cx.fillStyle = "#f75b4a"
+    this.cx.fon
+    this.cx.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
   drawCanvasBackground() {
@@ -589,11 +609,12 @@ window.addEventListener("keyup", event => {
 
 let counter = 0;
 
+
 function runLevel(currentLevel, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(currentLevel);
   let state = State.start(levelObj, levelIndex);
-  let startScreenTimer = 0; 
+  let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
@@ -611,8 +632,8 @@ function runLevel(currentLevel, levelIndex) {
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
-      if (state.levelIntroDone == true) state = state.update(timeElapsed, state)
-      if (startScreenTimer > 2000) state.levelIntroDone = true;
+      if (state.scoreData.levelIntroDone == true) state = state.update(timeElapsed, state)
+      if (startScreenTimer > 2000) state.scoreData.levelIntroDone = true;
       state.syncCanvas(timeElapsed, state);
       timePreviousFrame = timeCurrentFrame;
 
