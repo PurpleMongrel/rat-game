@@ -492,9 +492,11 @@ class State {
   }
 
   drawScoreCanvas() {
+    this.scoreCx.fillStyle = "#2c1c63";
+    this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
     this.scoreCx.font = `bold 20px serif`;
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}  Coins collected: ${this.scoreData.coinsCollected}  Block collisions: ${this.scoreData.blocksTouched}`, 10, 50, this.canvas.width - 20);
+    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}      Coins collected: ${this.scoreData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.scoreData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
   }
 
   drawLevelIntroCanvas() {
