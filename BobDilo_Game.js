@@ -23,7 +23,6 @@ var charKey;
 let coinsNeededToWin = 10;
 let blockCollisionMax = 5;
 
-
 function sparkleEffect(
   cx,
   xPos,
@@ -59,7 +58,7 @@ function sparkleEffect(
   }
 }
 
-
+//Draws both circular and square background blocks
 function drawBackgroundBlock(
   cx,
   xPos,
@@ -97,7 +96,7 @@ function drawBackgroundBlock(
   }
 }
 
-
+//Draws a circle on canvas
 function drawCenteredCircle(
   cx,
   xPos,
@@ -120,12 +119,12 @@ function drawCenteredCircle(
   cx.fill();
 }
 
-
+//Returns canvas y position converted from level string position
 function yCanvasPos(levelY, levelScroll) {
   return (levelY - levelScroll + 30) * pixelScale;
 }
 
-
+//Returns level y position converted from canvas string position
 function yLevelPos(canvasY, levelScroll) {
   return (canvasY / pixelScale) + levelScroll - 30
 }
@@ -139,10 +138,6 @@ function characterCanvasConversion(characterObj, level, type) {
   return canvasCharacter
 }
 
-
-function boundaryValues() {
-
-}
 
 // Checks what background objects Dilo collides with and returns them in an array 
 // canvasPosObj and sizePosObj are in format {x: .., y: ..} 
@@ -193,8 +188,10 @@ class Dilo {
     return new Dilo({ "x": x, "y": y }, { "up": 0, "down": 0, "left": 0, "right": 0 })
   }
 
+  //Updates Dilo x and y position according to time elapsed and arrows pressed
+  //Checks for Dilo collisions with background
   update(timeElapsed, state) {
-    let levelScroll = state.viewport.levelScroll
+
     let newX = this.position.x;
     let newY = this.position.y;
 
@@ -235,7 +232,8 @@ class Dilo {
     newY -= timeElapsed * this.speed.up;
     newY += timeElapsed * this.speed.down;
 
-    //Start of Dilo canvas boundary limits    
+    //Start of Dilo canvas boundary limits
+    //Makes sure Dilo character positions don't move past canvas boundaries    
     if (newX < diloFigureRadius) {
       newX = diloFigureRadius;
     }
@@ -250,35 +248,41 @@ class Dilo {
     };
     //End of Dilo canvas boundary limits
 
+    //Collided value is array of background elements that Dilo collided with
     let collided = backgroundCollision(
       { "x": newX, "y": newY },
       diloSizeObj,
       state
     );
 
+    //Updates scoreData with how many coins and blocks have been collided with
+    //Sets status to lost if blocks touched exceeds blockCollisionMax 
     for (let block of collided) {
 
       if (state.level.rows[block.row][block.column] != "collided") {
         /* console.log(block)
         console.log(this.level) */
+
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
+
           if (state.scoreData.blocksTouched > blockCollisionMax) {
             state.status = "lost";
-
           }
         }
         if (state.level.unparsedRows[block.row][block.column] == "*") {
           state.scoreData.coinsCollected++;
         }
+
         state.level.rows[block.row][block.column] = "collided";
       }
     }
+
     return new Dilo({ "x": newX, "y": newY }, this.speed)
   }
 
+  //Draws Dilo on canvas
   draw(state) {
-
     drawCenteredCircle(
       state.cx,
       this.position.x,
@@ -295,7 +299,7 @@ class Dilo {
   }
 }
 
-
+//Poorly named blackhole character is a sparkling background element
 class BlackHole {
   constructor(pos) {
     this.position = pos;
@@ -328,7 +332,7 @@ class BlackHole {
   }
 }
 
-
+//Charkeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of charkeys corresponds to a level (with colors of background elements changing)
 var charKeys = {
   0: {
     "#": "#409486",
@@ -356,7 +360,7 @@ var charKeys = {
   }
 }
 
-
+//Helper object - might be possible to clean up later
 var charTypes = {
   "bobDilo": Dilo,
   "blackHole": BlackHole
