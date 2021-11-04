@@ -5,7 +5,7 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.08;
+let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundColors = {
   0: "#191038",
@@ -20,8 +20,8 @@ let originalDiloAcceleration = 0.02;
 let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
-let coinsNeededToWin = 0;
-let blockCollisionMax = 100;
+let coinsNeededToWin = 10;
+let blockCollisionMax = 5;
 
 
 function sparkleEffect(
@@ -534,7 +534,8 @@ class State {
     this.cx.font = 'bold 80px serif';
     this.cx.textAlign = "center";
     this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-    this.cx.strokeText(`Game Won`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
+    this.cx.fillStyle = "white";
+    this.cx.fillText(`Game Won`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
   drawCanvasBackground() {
@@ -706,7 +707,7 @@ function runLevel(levelsArray, levelIndex) {
 
 
 async function runGame(levelsArray) {
-  for (let levelIndex = 2; levelIndex < levelsArray.length;) {
+  for (let levelIndex = 0; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray, levelIndex);
     if (status == "won") {
       levelIndex++;
