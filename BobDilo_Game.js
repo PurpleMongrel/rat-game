@@ -5,7 +5,7 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 15 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
+let levelScrollRate = 0.08;
 let redBlock = "#f75b4a";
 let backgroundColors = {
   0: "#191038",
@@ -20,7 +20,7 @@ let originalDiloAcceleration = 0.02;
 let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
-let coinsNeededToWin = 5;
+let coinsNeededToWin = 0;
 let blockCollisionMax = 100;
 
 
@@ -376,7 +376,6 @@ var Level = class Level {
         if (typeof charKey[char] == "string") return charKey[char];
 
         else {
-
           this.startingCharacters.unshift(charKey[char].create({ "x": x, "y": y }));
           return "empty";
         }
@@ -425,7 +424,7 @@ class State {
     this.scrollRate = scrollRate;
   }
 
-  static start(level, levelIndex) {
+  static start(level, levelsLength, levelIndex) {
 
     let canvasCharacters = []
 
@@ -446,6 +445,8 @@ class State {
         blocksTouched: 0,
         health: 100,
         level: levelIndex,
+        levelsLength,
+        gameWon: false,
         levelIntroDone: false
       },
       level.height,
@@ -484,10 +485,18 @@ class State {
       for (let char of this.characters) {
         char.draw(this);
       }
-    } else this.drawLevelIntroCanvas()
-
+    } else {
+      this.drawLevelIntroCanvas()
+    }
     if (this.status == "won") {
-      this.drawLevelPassed();
+      /* console.log(`level index: ${this.scoreData.levelIndex}`);
+      console.log(`levelsLength: ${this.scoreData.levelsLength}`); */
+      if (this.scoreData.gameWon == true) {
+        console.log('RATS')
+        this.drawGameWon();
+      } else {
+        this.drawLevelPassed();
+      }
     }
   }
 
@@ -518,8 +527,15 @@ class State {
     this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
     this.cx.lineWidth = 1.5;
     this.cx.fillStyle = "#f75b4a"
-    this.cx.fon
     this.cx.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
+  }
+
+  drawGameWon() {
+    this.cx.fillStyle = backgroundBlocks;
+    this.cx.font = 'bold 80px serif';
+    this.cx.textAlign = "center";
+    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    this.cx.strokeText(`Game Won`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
   drawCanvasBackground() {
@@ -557,14 +573,6 @@ class State {
             }
 
             if (color == "collided") {
-
-              //May not be neededQuesaWhy d
-
-              /* if (this.level.unparsedRows[pixelRow][x] == "*") {
-                shape = "circle";
-                color = "rgba(0, 0, 0, 0)";
-                radius = pixelScale / 2;
-              } */
 
               if (this.level.unparsedRows[pixelRow][x] == "#") {
                 shape = "square";
@@ -609,15 +617,16 @@ window.addEventListener("keyup", event => {
 let counter = 0;
 
 
-function runLevel(currentLevel, levelIndex) {
+function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
-  let levelObj = new Level(currentLevel);
-  let state = State.start(levelObj, levelIndex);
+  let levelObj = new Level(levelsArray[levelIndex]);
+  let state = State.start(levelObj, levelsArray.length, levelIndex);
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
   let endTimer = 0;
+  let gameWonTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
       timeCurrentFrame,
@@ -625,38 +634,60 @@ function runLevel(currentLevel, levelIndex) {
       state
     ) {
 
-
       counter++;
-      if (counter % 200 == 0) console.log(timeCurrentFrame)
+
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
-      if (state.scoreData.levelIntroDone == true) state = state.update(timeElapsed, state)
-      if (startScreenTimer > 2000) state.scoreData.levelIntroDone = true;
+
+      if (state.scoreData.levelIntroDone == true) {
+        state = state.update(timeElapsed, state)
+      }
+
+      if (startScreenTimer > 2000) {
+        state.scoreData.levelIntroDone = true;
+      }
+
       state.syncCanvas(timeElapsed, state);
       timePreviousFrame = timeCurrentFrame;
 
       if (state.viewport.levelScroll < 30) {
+
         if (state.scoreData.coinsCollected < coinsNeededToWin) {
           state.status = "lost"
-        } else state.status = "won";
-      }
-      if (state.status == "playing") {
-        requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
+        } else {
+          state.status = "won";
+        }
+      }
+
+      if (state.status == "playing") {
+
+        requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
       } else if (endTimer < 1) {
+
         if (state.status == "lost") {
           diloColor = "white"
-
         }
+
         state.scrollRate = 0;
         endTimer += 0.01;
 
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
-
         //resolve(state.status);
       } else {
+
+        if ((state.scoreData.level == state.scoreData.levelsLength - 1) 
+          && (state.status = "won")) {
+
+          state.scoreData.gameWon = true;
+          
+          if (gameWonTimer < 1) {
+            gameWonTimer += 0.01;
+            requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
+          }
+        }
         diloColor = originalDiloColor;
         state.canvas.remove();
         state.scoreCanvas.remove();
@@ -671,10 +702,11 @@ function runLevel(currentLevel, levelIndex) {
 
 async function runGame(levelsArray) {
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
-    let status = await runLevel(levelsArray[levelIndex], levelIndex);
+    let status = await runLevel(levelsArray, levelIndex);
     if (status == "won") {
       levelIndex++;
     }
   }
+
   console.log("GAME WON!!!")
 }
