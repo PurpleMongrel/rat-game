@@ -131,6 +131,7 @@ function yLevelPos(canvasY, levelScroll) {
 }
 
 
+//Returns character objet with position values based on canvas (rather than on string level plan)
 function characterCanvasConversion(characterObj, level, type) {
   let newX = characterObj.position.x * pixelScale;
   let newY = yCanvasPos(characterObj.position.y, level.height);
@@ -143,6 +144,7 @@ function boundaryValues() {
 
 }
 
+// Checks what background objects Dilo collides with and returns them in an array 
 // canvasPosObj and sizePosObj are in format {x: .., y: ..} 
 function backgroundCollision(canvasPosObj, sizeObj, state) {
 
@@ -171,7 +173,7 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
   return collisionBlocks;
 }
 
-
+//Tracks if keys are currently pressed
 let pressedKeys = {
   ArrowUp: false,
   ArrowDown: false,
