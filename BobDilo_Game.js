@@ -492,7 +492,6 @@ class State {
       /* console.log(`level index: ${this.scoreData.levelIndex}`);
       console.log(`levelsLength: ${this.scoreData.levelsLength}`); */
       if (this.scoreData.gameWon == true) {
-        console.log('RATS')
         this.drawGameWon();
       } else {
         this.drawLevelPassed();
@@ -678,20 +677,26 @@ function runLevel(levelsArray, levelIndex) {
         //resolve(state.status);
       } else {
 
-        if ((state.scoreData.level == state.scoreData.levelsLength - 1) 
+        if ((state.scoreData.level == state.scoreData.levelsLength - 1)
           && (state.status = "won")) {
 
           state.scoreData.gameWon = true;
-          
+
           if (gameWonTimer < 1) {
             gameWonTimer += 0.01;
             requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
+
+          } else {
+            state.canvas.remove();
+            state.scoreCanvas.remove();
+            resolve(state.status);
           }
+        } else {
+          diloColor = originalDiloColor;
+          state.canvas.remove();
+          state.scoreCanvas.remove();
+          resolve(state.status);
         }
-        diloColor = originalDiloColor;
-        state.canvas.remove();
-        state.scoreCanvas.remove();
-        resolve(state.status);
       }
     }
 
@@ -701,7 +706,7 @@ function runLevel(levelsArray, levelIndex) {
 
 
 async function runGame(levelsArray) {
-  for (let levelIndex = 0; levelIndex < levelsArray.length;) {
+  for (let levelIndex = 2; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray, levelIndex);
     if (status == "won") {
       levelIndex++;
