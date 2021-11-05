@@ -367,6 +367,7 @@ var charTypes = {
 }
 
 
+//Takes level plan string as input, and creates level object
 var Level = class Level {
 
   constructor(levelString) {
@@ -482,12 +483,15 @@ class State {
     );
   }
 
+  //Uses elapsed time and state to draw game canvas and score canvas. Alternates between level start, level passed, game, and game won
   syncCanvas(timeElapsed, state) {
 
     this.drawScoreCanvas();
 
     if (this.scoreData.levelIntroDone == true) {
+
       this.drawCanvasBackground(this.level);
+
       for (let char of this.characters) {
         char.draw(this);
       }
@@ -495,11 +499,11 @@ class State {
       this.drawLevelIntroCanvas()
     }
     if (this.status == "won") {
-      /* console.log(`level index: ${this.scoreData.levelIndex}`);
-      console.log(`levelsLength: ${this.scoreData.levelsLength}`); */
+
       if (this.scoreData.gameWon == true) {
         this.drawGameWon();
       } else {
+
         this.drawLevelPassed();
       }
     }
