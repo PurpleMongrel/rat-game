@@ -408,8 +408,14 @@ class State {
 
     this.level = level;
     this.characters = characters;
+
+    //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
+
+    //Canvas on which game is played
     this.canvas = canvas;
+
+    //Keeps track of score and collisions small canvas above game canvas
     this.scoreCanvas = scoreCanvas;
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
@@ -423,6 +429,7 @@ class State {
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
 
+    //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
       levelScroll: levelScroll,
       height: this.canvas.height / pixelScale,
