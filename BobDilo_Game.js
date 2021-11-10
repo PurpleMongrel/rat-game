@@ -642,7 +642,11 @@ function runLevel(levelsArray, levelIndex) {
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
+
+  //endTimer used to implement pause to display level status between end of current level and start of next level (or game won)
   let endTimer = 0;
+
+  //gameWonTimer used to implement pause to display Game won screen before canvas is cleared
   let gameWonTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
@@ -653,6 +657,7 @@ function runLevel(levelsArray, levelIndex) {
 
       counter++;
 
+      //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
