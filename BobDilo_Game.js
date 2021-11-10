@@ -408,8 +408,14 @@ class State {
 
     this.level = level;
     this.characters = characters;
+
+    //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
+
+    //Canvas on which game is played
     this.canvas = canvas;
+
+    //Keeps track of score and collisions small canvas above game canvas
     this.scoreCanvas = scoreCanvas;
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
@@ -423,6 +429,7 @@ class State {
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
 
+    //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
       levelScroll: levelScroll,
       height: this.canvas.height / pixelScale,
@@ -635,7 +642,11 @@ function runLevel(levelsArray, levelIndex) {
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
+
+  //endTimer used to implement pause to display level status between end of current level and start of next level (or game won)
   let endTimer = 0;
+
+  //gameWonTimer used to implement pause to display Game won screen before canvas is cleared
   let gameWonTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
@@ -646,6 +657,7 @@ function runLevel(levelsArray, levelIndex) {
 
       counter++;
 
+      //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
