@@ -495,6 +495,7 @@ class State {
 
     this.drawScoreCanvas();
 
+    //Decides which screen should be displayed according to level result and game status
     if (this.scoreData.levelIntroDone == true) {
 
       this.drawCanvasBackground(this.level);
