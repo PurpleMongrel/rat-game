@@ -23,9 +23,11 @@ let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
 let coinsNeededToWin = 10;
-let blockCollisionMax = 5;
+let blockCollisionMax = 100;
 let diloSpriteWidth = 30;
 let diloSpriteHeight = 86;
+let diloSprites = document.createElement("img");
+diloSprites.src = "dilo_sprite.png"
 
 function sparkleEffect(
   cx,
@@ -285,15 +287,13 @@ class Dilo {
     return new Dilo({ "x": newX, "y": newY }, this.speed)
   }
 
-  //Draws Dilo on canvas
+  //Draws Dilo sprite on canvas
   draw(state) {
+
     state.cx.shadowColor = "#f07373";
-    let diloSprites = document.createElement("img");
-    diloSprites.src = "dilo_sprite.png"
-    
     let spriteTile = Math.floor(Date.now() / 50) % 5;
-    console.log(spriteTile)
-    state.cx.drawImage( 
+
+    state.cx.drawImage(
       diloSprites,
       spriteTile * diloSpriteWidth,
       0,
@@ -305,15 +305,15 @@ class Dilo {
       diloSpriteHeight,
     )
 
-  /*   drawCenteredCircle(
-      state.cx,
-      this.position.x,
-      this.position.y,
-      diloFigureRadius,
-      diloColor,
-      diloColor,
-      10
-    ) */
+    /*   drawCenteredCircle(
+        state.cx,
+        this.position.x,
+        this.position.y,
+        diloFigureRadius,
+        diloColor,
+        diloColor,
+        10
+      ) */
   }
 
   get type() {
@@ -426,7 +426,9 @@ class State {
     scoreCanvas,
     scoreData,
     levelScroll,
-    scrollRate) {
+    scrollRate,
+    pointerObj
+    ) {
 
     this.level = level;
     this.characters = characters;
@@ -450,6 +452,8 @@ class State {
     this.scoreData = scoreData;
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
+    this.canvasRect = this.canvas.getBoundingClientRect();
+    this.pointerObj = pointerObj;
 
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
@@ -461,7 +465,6 @@ class State {
   }
 
   static start(level, levelsLength, levelIndex) {
-
     let canvasCharacters = []
 
     for (let character of level.startingCharacters) {
@@ -491,7 +494,10 @@ class State {
   }
 
   update(timeElapsed, state) {
-
+    if (counter % 300 == 0) {
+      console.log(state);
+      console.log(this.canvasRect.left)
+    }
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
     let newCharacters = [];
 
@@ -508,7 +514,12 @@ class State {
       this.scoreCanvas,
       this.scoreData,
       this.viewport.levelScroll,
-      this.scrollRate
+      this.scrollRate,
+      {
+        x: this.canvasRect.x + this.canvas.width / 2 + 100,
+        y: this.canvasRect.y + this.canvas.height / 2
+      }
+      
     );
   }
 
@@ -536,6 +547,12 @@ class State {
 
         this.drawLevelPassed();
       }
+    }
+    
+    if (this.pointerObj) {
+    this.drawPointer(
+      mousePos.x - this.canvasRect.x, 
+      mousePos.y - this.canvasRect.y)
     }
   }
 
@@ -577,6 +594,13 @@ class State {
     this.cx.fillStyle = "white";
     this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
+
+drawPointer(x,y) {
+  if (counter%100 == 0) console.log(mousePos)
+  this.cx.fillStyle = "red";
+  this.cx.arc(x,y,5,0,7)
+  this.cx.fill();
+}
 
   drawCanvasBackground() {
 
@@ -653,11 +677,14 @@ window.addEventListener("keyup", event => {
   }
 })
 
+let mousePos = {x: 0, y: 0}
 
 //track mouse
 window.addEventListener("mousemove", event => {
+  let activated; 
   if (!activated) {
-    console.log(`mouse position: ${event.pageX}, ${event.pageY}`);
+   mousePos.x = event.pageX;
+   mousePos.y = event.pageY
 
     activated = null;
   }
@@ -671,6 +698,11 @@ function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
+  /* state.pointerObj = {
+    x: state.canvasRect.x + this.canvas.width / 2 + 100,
+    y: state.canvasRect.y + this.canvas.height / 2
+  } */
+  console.log(state.canvasRect);
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
