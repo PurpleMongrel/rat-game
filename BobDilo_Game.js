@@ -1,13 +1,13 @@
-//git test
+
 
 let pixelScale = 20;
 let diloFigureHeight = 1.4 * pixelScale;
-let diloFigureWidth = 1.5 * pixelScale;
+let diloFigureWidth = 30;
 let diloFigureRadius = 15;
-let diloSizeObj = { "x": 15, "y": 15 };
+let diloSizeObj = { "x": 15, "y": 86 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
+let levelScrollRate = 0.005;
 let redBlock = "#f75b4a";
 let backgroundColors = {
   0: "#191038",
@@ -23,7 +23,11 @@ let diloDeceleration = 0.02;
 let diloMaxSpeed = 0.3;
 var charKey;
 let coinsNeededToWin = 10;
-let blockCollisionMax = 5;
+let blockCollisionMax = 100;
+let diloSpriteWidth = 30;
+let diloSpriteHeight = 86;
+let diloSprites = document.createElement("img");
+diloSprites.src = "dilo_sprite.png"
 
 function sparkleEffect(
   cx,
@@ -147,10 +151,10 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
 
   let levelPosX = canvasPosObj.x / pixelScale;
   let levelPosY = yLevelPos(canvasPosObj.y, state.viewport.levelScroll);
-  let upperLimit = levelPosY - sizeObj.y / pixelScale;
-  let lowerLimit = levelPosY + 15 / 20;
-  let leftLimit = levelPosX - 15 / 20;
-  let rightLimit = levelPosX + 15 / 20;
+  let upperLimit = levelPosY;
+  let lowerLimit = levelPosY + (sizeObj.y / pixelScale);
+  let leftLimit = levelPosX;
+  let rightLimit = levelPosX + sizeObj.x / pixelScale;
   let collisionBlocks = [];
 
   for (let y = Math.floor(upperLimit); y < Math.ceil(lowerLimit); y++) {
@@ -283,17 +287,33 @@ class Dilo {
     return new Dilo({ "x": newX, "y": newY }, this.speed)
   }
 
-  //Draws Dilo on canvas
+  //Draws Dilo sprite on canvas
   draw(state) {
-    drawCenteredCircle(
-      state.cx,
+
+    state.cx.shadowColor = "#f07373";
+    let spriteTile = Math.floor(Date.now() / 50) % 5;
+
+    state.cx.drawImage(
+      diloSprites,
+      spriteTile * diloSpriteWidth,
+      0,
+      diloSpriteWidth,
+      diloSpriteHeight,
       this.position.x,
       this.position.y,
-      diloFigureRadius,
-      diloColor,
-      diloColor,
-      10
+      diloSpriteWidth,
+      diloSpriteHeight,
     )
+
+    /*   drawCenteredCircle(
+        state.cx,
+        this.position.x,
+        this.position.y,
+        diloFigureRadius,
+        diloColor,
+        diloColor,
+        10
+      ) */
   }
 
   get type() {
@@ -406,12 +426,20 @@ class State {
     scoreCanvas,
     scoreData,
     levelScroll,
-    scrollRate) {
+    scrollRate,
+    pointerObj
+    ) {
 
     this.level = level;
     this.characters = characters;
+
+    //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
+
+    //Canvas on which game is played
     this.canvas = canvas;
+
+    //Keeps track of score and collisions small canvas above game canvas
     this.scoreCanvas = scoreCanvas;
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
@@ -424,7 +452,10 @@ class State {
     this.scoreData = scoreData;
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
+    this.canvasRect = this.canvas.getBoundingClientRect();
+    this.pointerObj = pointerObj;
 
+    //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
       levelScroll: levelScroll,
       height: this.canvas.height / pixelScale,
@@ -434,7 +465,6 @@ class State {
   }
 
   static start(level, levelsLength, levelIndex) {
-
     let canvasCharacters = []
 
     for (let character of level.startingCharacters) {
@@ -464,7 +494,10 @@ class State {
   }
 
   update(timeElapsed, state) {
-
+    if (counter % 300 == 0) {
+      console.log(state);
+      console.log(this.canvasRect.left)
+    }
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
     let newCharacters = [];
 
@@ -481,7 +514,12 @@ class State {
       this.scoreCanvas,
       this.scoreData,
       this.viewport.levelScroll,
-      this.scrollRate
+      this.scrollRate,
+      {
+        x: this.canvasRect.x + this.canvas.width / 2 + 100,
+        y: this.canvasRect.y + this.canvas.height / 2
+      }
+      
     );
   }
 
@@ -490,6 +528,7 @@ class State {
 
     this.drawScoreCanvas();
 
+    //Decides which screen should be displayed according to level result and game status
     if (this.scoreData.levelIntroDone == true) {
 
       this.drawCanvasBackground(this.level);
@@ -508,6 +547,12 @@ class State {
 
         this.drawLevelPassed();
       }
+    }
+    
+    if (this.pointerObj) {
+    this.drawPointer(
+      mousePos.x - this.canvasRect.x, 
+      mousePos.y - this.canvasRect.y)
     }
   }
 
@@ -547,8 +592,15 @@ class State {
     this.cx.textAlign = "center";
     this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     this.cx.fillStyle = "white";
-    this.cx.fillText(`Game Won`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
+    this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
+
+drawPointer(x,y) {
+  if (counter%100 == 0) console.log(mousePos)
+  this.cx.fillStyle = "red";
+  this.cx.arc(x,y,5,0,7)
+  this.cx.fill();
+}
 
   drawCanvasBackground() {
 
@@ -625,6 +677,19 @@ window.addEventListener("keyup", event => {
   }
 })
 
+let mousePos = {x: 0, y: 0}
+
+//track mouse
+window.addEventListener("mousemove", event => {
+  let activated; 
+  if (!activated) {
+   mousePos.x = event.pageX;
+   mousePos.y = event.pageY
+
+    activated = null;
+  }
+  scheduled = true;
+})
 
 let counter = 0;
 
@@ -633,11 +698,20 @@ function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
+  /* state.pointerObj = {
+    x: state.canvasRect.x + this.canvas.width / 2 + 100,
+    y: state.canvasRect.y + this.canvas.height / 2
+  } */
+  console.log(state.canvasRect);
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
   console.log(state)
+
+  //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
+
+  //gameWonTimer used to implement pause to display "You Win!"" screen before canvas is cleared
   let gameWonTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
@@ -648,6 +722,7 @@ function runLevel(levelsArray, levelIndex) {
 
       counter++;
 
+      //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
@@ -726,5 +801,5 @@ async function runGame(levelsArray) {
     }
   }
 
-  console.log("GAME WON!!!")
+  console.log("YOU WIN!!")
 }
