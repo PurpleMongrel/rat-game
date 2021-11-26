@@ -2,12 +2,12 @@
 
 let pixelScale = 20;
 let diloFigureHeight = 1.4 * pixelScale;
-let diloFigureWidth = 1.5 * pixelScale;
+let diloFigureWidth = 30;
 let diloFigureRadius = 15;
-let diloSizeObj = { "x": 15, "y": 15 };
+let diloSizeObj = { "x": 15, "y": 86 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
+let levelScrollRate = 0.005;
 let redBlock = "#f75b4a";
 let backgroundColors = {
   0: "#191038",
@@ -24,6 +24,8 @@ let diloMaxSpeed = 0.3;
 var charKey;
 let coinsNeededToWin = 10;
 let blockCollisionMax = 5;
+let diloSpriteWidth = 30;
+let diloSpriteHeight = 86;
 
 function sparkleEffect(
   cx,
@@ -147,9 +149,9 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
 
   let levelPosX = canvasPosObj.x / pixelScale;
   let levelPosY = yLevelPos(canvasPosObj.y, state.viewport.levelScroll);
-  let upperLimit = levelPosY - sizeObj.y / pixelScale;
-  let lowerLimit = levelPosY + 15 / 20;
-  let leftLimit = levelPosX - 15 / 20;
+  let upperLimit = levelPosY;
+  let lowerLimit = levelPosY + (sizeObj.y / pixelScale);
+  let leftLimit = levelPosX;
   let rightLimit = levelPosX + 15 / 20;
   let collisionBlocks = [];
 
@@ -285,7 +287,25 @@ class Dilo {
 
   //Draws Dilo on canvas
   draw(state) {
-    drawCenteredCircle(
+    state.cx.shadowColor = "#f07373";
+    let diloSprites = document.createElement("img");
+    diloSprites.src = "dilo_sprite.png"
+    
+    let spriteTile = Math.floor(Date.now() / 50) % 5;
+    console.log(spriteTile)
+    state.cx.drawImage( 
+      diloSprites,
+      spriteTile * diloSpriteWidth,
+      0,
+      diloSpriteWidth,
+      diloSpriteHeight,
+      this.position.x,
+      this.position.y,
+      diloSpriteWidth,
+      diloSpriteHeight,
+    )
+
+  /*   drawCenteredCircle(
       state.cx,
       this.position.x,
       this.position.y,
@@ -293,7 +313,7 @@ class Dilo {
       diloColor,
       diloColor,
       10
-    )
+    ) */
   }
 
   get type() {
@@ -633,6 +653,14 @@ window.addEventListener("keyup", event => {
   }
 })
 
+window.addEventListener("mousemove", event => {
+  if (!activated) {
+    console.log(`mouse position: ${event.pageX}, ${event.pageY}`);
+
+    activated = null;
+  }
+  scheduled = true;
+})
 
 let counter = 0;
 
