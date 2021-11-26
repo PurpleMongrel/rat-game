@@ -152,7 +152,7 @@ function backgroundCollision(canvasPosObj, sizeObj, state) {
   let upperLimit = levelPosY;
   let lowerLimit = levelPosY + (sizeObj.y / pixelScale);
   let leftLimit = levelPosX;
-  let rightLimit = levelPosX + 15 / 20;
+  let rightLimit = levelPosX + sizeObj.x / pixelScale;
   let collisionBlocks = [];
 
   for (let y = Math.floor(upperLimit); y < Math.ceil(lowerLimit); y++) {
@@ -653,6 +653,8 @@ window.addEventListener("keyup", event => {
   }
 })
 
+
+//track mouse
 window.addEventListener("mousemove", event => {
   if (!activated) {
     console.log(`mouse position: ${event.pageX}, ${event.pageY}`);
