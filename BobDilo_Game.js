@@ -7,7 +7,7 @@ let diloFigureRadius = 15;
 let diloSizeObj = { "x": 15, "y": 86 };
 let diloMoveRate = 0.05;
 let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.005;
+let levelScrollRate = 0.01;
 let redBlock = "#f75b4a";
 let backgroundColors = {
   0: "#191038",
