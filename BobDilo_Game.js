@@ -555,7 +555,7 @@ class State {
     this.cx.textAlign = "center";
     this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     this.cx.fillStyle = "white";
-    this.cx.fillText(`Game Won`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
+    this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
   drawCanvasBackground() {
@@ -646,10 +646,10 @@ function runLevel(levelsArray, levelIndex) {
 
   console.log(state)
 
-  //endTimer used to implement pause to display level status between end of current level and start of next level (or game won)
+  //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
 
-  //gameWonTimer used to implement pause to display Game won screen before canvas is cleared
+  //gameWonTimer used to implement pause to display "You Win!"" screen before canvas is cleared
   let gameWonTimer = 0;
   return new Promise((resolve) => {
     function frameAnimation(
@@ -739,5 +739,5 @@ async function runGame(levelsArray) {
     }
   }
 
-  console.log("GAME WON!!!")
+  console.log("YOU WIN!!")
 }
