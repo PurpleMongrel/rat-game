@@ -266,8 +266,6 @@ class Dilo {
     for (let block of collided) {
 
       if (state.level.rows[block.row][block.column] != "collided") {
-        /* console.log(block)
-        console.log(this.level) */
 
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.scoreData.blocksTouched++;
@@ -293,13 +291,22 @@ class Dilo {
     state.cx.shadowColor = "#f07373";
     let spriteTile = Math.floor(Date.now() / 50) % 5;
 
+    state.cx.save();
 
     // tilt dilo sprite according to mouse position
-    let diloAngleRad = Math.atan2(
-      state.pointerObj.y - this.position.y, 
-      state.pointerObj.x - this.position.x
-      );
+let mouseX = mousePos.x - state.canvasRect.x;
+let mouseY = mousePos.y - state.canvasRect.y;
 
+     if (mousePos) {
+       let diloAngleRad = Math.atan2(
+         mouseY - this.position.y,
+         mouseX - this.position.x
+       );
+
+       state.cx.translate(this.position.x, this.position.y)
+       state.cx.rotate(diloAngleRad += Math.PI/2);
+       state.cx.translate(-this.position.x, -this.position.y)
+     }
     //draw dilo sprite from png
     state.cx.drawImage(
       diloSprites,
@@ -312,7 +319,7 @@ class Dilo {
       diloSpriteWidth,
       diloSpriteHeight,
     )
-
+    state.cx.restore();
     /*   drawCenteredCircle(
         state.cx,
         this.position.x,
@@ -435,7 +442,7 @@ class State {
     scoreData,
     levelScroll,
     scrollRate,
-    pointerObj
+    //pointerObj
   ) {
 
     this.level = level;
@@ -461,7 +468,7 @@ class State {
     this.cx = this.canvas.getContext("2d");
     this.scoreCx = this.scoreCanvas.getContext("2d");
     this.canvasRect = this.canvas.getBoundingClientRect();
-    this.pointerObj = pointerObj;
+    //this.pointerObj = pointerObj;
 
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
@@ -504,7 +511,6 @@ class State {
   update(timeElapsed, state) {
     if (counter % 300 == 0) {
       console.log(state);
-      console.log(this.canvasRect.left)
     }
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
     let newCharacters = [];
@@ -557,7 +563,7 @@ class State {
       }
     }
 
-    if (this.pointerObj) {
+    if (mousePos && this.scoreData.levelIntroDone) {
       this.drawPointer(
         mousePos.x - this.canvasRect.x,
         mousePos.y - this.canvasRect.y)
@@ -604,7 +610,7 @@ class State {
   }
 
   drawPointer(x, y) {
-    if (counter % 100 == 0) console.log(mousePos)
+    //if (counter % 100 == 0) console.log(mousePos)
     this.cx.fillStyle = "red";
     this.cx.arc(x, y, 5, 0, 7)
     this.cx.fill();
@@ -691,8 +697,7 @@ let mousePos = { x: 0, y: 0 }
 window.addEventListener("mousemove", event => {
   let activated;
   if (!activated) {
-    mousePos.x = event.pageX;
-    mousePos.y = event.pageY
+    mousePos = { x: event.pageX, y: event.pageY };
 
     activated = null;
   }
@@ -706,15 +711,8 @@ function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
-  /* state.pointerObj = {
-    x: state.canvasRect.x + this.canvas.width / 2 + 100,
-    y: state.canvasRect.y + this.canvas.height / 2
-  } */
-  console.log(state.canvasRect);
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
-
-  console.log(state)
 
   //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
