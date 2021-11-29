@@ -293,6 +293,14 @@ class Dilo {
     state.cx.shadowColor = "#f07373";
     let spriteTile = Math.floor(Date.now() / 50) % 5;
 
+
+    // tilt dilo sprite according to mouse position
+    let diloAngleRad = Math.atan2(
+      state.pointerObj.y - this.position.y, 
+      state.pointerObj.x - this.position.x
+      );
+
+    //draw dilo sprite from png
     state.cx.drawImage(
       diloSprites,
       spriteTile * diloSpriteWidth,
@@ -428,7 +436,7 @@ class State {
     levelScroll,
     scrollRate,
     pointerObj
-    ) {
+  ) {
 
     this.level = level;
     this.characters = characters;
@@ -519,7 +527,7 @@ class State {
         x: this.canvasRect.x + this.canvas.width / 2 + 100,
         y: this.canvasRect.y + this.canvas.height / 2
       }
-      
+
     );
   }
 
@@ -548,11 +556,11 @@ class State {
         this.drawLevelPassed();
       }
     }
-    
+
     if (this.pointerObj) {
-    this.drawPointer(
-      mousePos.x - this.canvasRect.x, 
-      mousePos.y - this.canvasRect.y)
+      this.drawPointer(
+        mousePos.x - this.canvasRect.x,
+        mousePos.y - this.canvasRect.y)
     }
   }
 
@@ -595,12 +603,12 @@ class State {
     this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
-drawPointer(x,y) {
-  if (counter%100 == 0) console.log(mousePos)
-  this.cx.fillStyle = "red";
-  this.cx.arc(x,y,5,0,7)
-  this.cx.fill();
-}
+  drawPointer(x, y) {
+    if (counter % 100 == 0) console.log(mousePos)
+    this.cx.fillStyle = "red";
+    this.cx.arc(x, y, 5, 0, 7)
+    this.cx.fill();
+  }
 
   drawCanvasBackground() {
 
@@ -677,14 +685,14 @@ window.addEventListener("keyup", event => {
   }
 })
 
-let mousePos = {x: 0, y: 0}
+let mousePos = { x: 0, y: 0 }
 
 //track mouse
 window.addEventListener("mousemove", event => {
-  let activated; 
+  let activated;
   if (!activated) {
-   mousePos.x = event.pageX;
-   mousePos.y = event.pageY
+    mousePos.x = event.pageX;
+    mousePos.y = event.pageY
 
     activated = null;
   }
