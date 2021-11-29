@@ -40,12 +40,12 @@ function sparkleEffect(
 ) {
 
   for (let i = 0; i < 10; i++) {
-  
+
     cx.shadowColor = shadowColor;
     cx.shadowBlur = shadowBlur;
     cx.fillStyle = fillStyle;
 
-if (fillStyle != "green") console.log(fillStyle)
+    if (fillStyle != "green") console.log(fillStyle)
 
     let signX = 1;
     let signY = 1;
@@ -296,19 +296,19 @@ class Dilo {
     state.cx.save();
 
     // tilt dilo sprite according to mouse position
-let mouseX = mousePos.x - state.canvasRect.x;
-let mouseY = mousePos.y - state.canvasRect.y;
+    let mouseX = mousePos.x - state.canvasRect.x;
+    let mouseY = mousePos.y - state.canvasRect.y;
 
-     if (mousePos) {
-       let diloAngleRad = Math.atan2(
-         mouseY - this.position.y,
-         mouseX - this.position.x
-       );
+    if (mousePos) {
+      let diloAngleRad = Math.atan2(
+        mouseY - this.position.y,
+        mouseX - this.position.x
+      );
 
-       state.cx.translate(this.position.x, this.position.y)
-       state.cx.rotate(diloAngleRad += Math.PI/2);
-       state.cx.translate(-this.position.x, -this.position.y)
-     }
+      state.cx.translate(this.position.x, this.position.y)
+      state.cx.rotate(diloAngleRad += Math.PI / 2);
+      state.cx.translate(-this.position.x, -this.position.y)
+    }
     //draw dilo sprite from png
     state.cx.drawImage(
       diloSprites,
@@ -571,7 +571,7 @@ class State {
         mousePos.x - this.canvasRect.x,
         mousePos.y - this.canvasRect.y)
     } */
-  } 
+  }
 
   drawScoreCanvas() {
     this.scoreCx.fillStyle = "#2c1c63";
@@ -587,8 +587,32 @@ class State {
     this.cx.font = 'bold 100px serif';
     this.cx.lineWidth = 1.5;
     this.cx.textAlign = "center";
-    this.cx.strokeStyle = charKey["#"]
+    this.cx.strokeStyle = "white";
+    this.cx.fillStyle = charKey["#"];
     this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
+
+    if (this.scoreData.level == 0) {
+
+      let ruleSpacer = 100;
+      let gameRules = [
+        `Move rat with arrows`,
+        `Aim vicious attacks with mouse`,
+        `Collect ${coinsNeededToWin} cheese coins`,
+        `Limit block collisions to ${blockCollisionMax}`
+      ]
+
+      this.cx.font = 'bold 25px serif';
+      this.cx.textAlign = "left";
+
+      for (let rule of gameRules) {
+
+        this.cx.fillText(rule, 10, this.canvas.height / 4 + ruleSpacer);
+
+        ruleSpacer += 50;
+      }
+
+      ruleSpacer += 50;
+    }
   }
 
   drawLevelPassed() {
@@ -741,7 +765,15 @@ function runLevel(levelsArray, levelIndex) {
         state = state.update(timeElapsed, state)
       }
 
-      if (startScreenTimer > 2000) {
+      let startScreenCounter = 2000;
+      if (
+        state.scoreData.levelIntroDone == false &&
+        state.scoreData.level == 0
+      ) {
+        startScreenCounter = 6000;
+      }
+
+      if (startScreenTimer > startScreenCounter) {
         state.scoreData.levelIntroDone = true;
       }
 
@@ -758,10 +790,15 @@ function runLevel(levelsArray, levelIndex) {
         }
       }
 
+      let endTimerControl = 1;
+
+
       if (state.status == "playing") {
 
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-      } else if (endTimer < 1) {
+
+
+      } else if (endTimer < endTimerControl) {
 
         if (state.status == "lost") {
           diloColor = "white"
