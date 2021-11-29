@@ -39,11 +39,13 @@ function sparkleEffect(
   shadowBlur,
 ) {
 
-  cx.shadowColor = shadowColor;
-  cx.shadowBlur = shadowBlur;
-  cx.fillStyle = fillStyle;
-
   for (let i = 0; i < 10; i++) {
+  
+    cx.shadowColor = shadowColor;
+    cx.shadowBlur = shadowBlur;
+    cx.fillStyle = fillStyle;
+
+if (fillStyle != "green") console.log(fillStyle)
 
     let signX = 1;
     let signY = 1;
@@ -563,12 +565,13 @@ class State {
       }
     }
 
-    if (mousePos && this.scoreData.levelIntroDone) {
+    //Might use later 
+    /* if (mousePos && this.scoreData.levelIntroDone) {
       this.drawPointer(
         mousePos.x - this.canvasRect.x,
         mousePos.y - this.canvasRect.y)
-    }
-  }
+    } */
+  } 
 
   drawScoreCanvas() {
     this.scoreCx.fillStyle = "#2c1c63";
@@ -609,12 +612,13 @@ class State {
     this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
   }
 
-  drawPointer(x, y) {
+  //Might use again if creating custom crosshair pointer
+  /* drawPointer(x, y) {
     //if (counter % 100 == 0) console.log(mousePos)
-    this.cx.fillStyle = "red";
+    this.cx.fillStyle = "white";
     this.cx.arc(x, y, 5, 0, 7)
     this.cx.fill();
-  }
+  } */
 
   drawCanvasBackground() {
 
