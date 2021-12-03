@@ -29,6 +29,7 @@ let diloSpriteHeight = 86;
 let diloSprites = document.createElement("img");
 diloSprites.src = "dilo_sprite.png"
 
+//Creates a randomized "sparkling" of circles drawn around a point
 function sparkleEffect(
   cx,
   xPos,
