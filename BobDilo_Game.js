@@ -472,6 +472,7 @@ class State {
     this.canvasRect = this.canvas.getBoundingClientRect();
     //this.pointerObj = pointerObj;
 
+
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
       levelScroll: levelScroll,
@@ -732,6 +733,23 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
+function clickListener(state) {
+
+  //let canvasElement = document.getElementById("canvas");
+  let canvasElement = state.canvas
+
+  //console.log(canvasElement)
+
+  canvasElement.addEventListener("click", event => {
+    // calls bullet character class create method
+    // remeber to convert event click with bounding rectangle thingamadoo
+    console.log(11111)
+    console.log(`youuuuu clicked ${event.pageX} ${event.pageY}}`)
+  })
+
+
+}
+
 let counter = 0;
 
 
@@ -763,6 +781,7 @@ function runLevel(levelsArray, levelIndex) {
 
       if (state.scoreData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
+        clickListener(state);
       }
 
       let startScreenCounter = 2000;
