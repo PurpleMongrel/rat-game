@@ -30,6 +30,7 @@ let pixelScale = 20,
 diloSprites.src = "dilo_sprite.png"
 var charKey;
 
+//Creates a randomized "sparkling" of circles drawn around a point
 function sparkleEffect(
   cx,
   xPos,
