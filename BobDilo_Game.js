@@ -1,33 +1,34 @@
 
 
-let pixelScale = 20;
-let diloFigureHeight = 1.4 * pixelScale;
-let diloFigureWidth = 30;
-let diloFigureRadius = 15;
-let diloSizeObj = { "x": 15, "y": 86 };
-let diloMoveRate = 0.05;
-let originaldiloMoveRate = 0.05;
-let levelScrollRate = 0.01;
-let redBlock = "#f75b4a";
-let backgroundColors = {
-  0: "#191038",
-  1: "#346557",
-  2: "#3c4e72"
-};
-let backgroundBlocks;
-let diloColor = "#f07373";
-let originalDiloColor = "#f07373";
-let diloAcceleration = 0.02;
-let originalDiloAcceleration = 0.02;
-let diloDeceleration = 0.02;
-let diloMaxSpeed = 0.3;
-var charKey;
-let coinsNeededToWin = 10;
-let blockCollisionMax = 100;
-let diloSpriteWidth = 30;
-let diloSpriteHeight = 86;
-let diloSprites = document.createElement("img");
+let pixelScale = 20,
+  diloFigureHeight = 1.4 * pixelScale,
+  diloFigureWidth = 30,
+  diloFigureRadius = 15,
+  diloSizeObj = { "x": 15, "y": 86 },
+  diloMoveRate = 0.05,
+  originaldiloMoveRate = 0.05,
+  levelScrollRate = 0.01,
+  redBlock = "#f75b4a",
+  backgroundColors = {
+    0: "#191038",
+    1: "#346557",
+    2: "#3c4e72"
+  },
+  backgroundBlocks,
+  diloColor = "#f07373",
+  originalDiloColor = "#f07373",
+  diloAcceleration = 0.02,
+  originalDiloAcceleration = 0.02,
+  diloDeceleration = 0.02,
+  diloMaxSpeed = 0.3,
+  coinsNeededToWin = 10,
+  blockCollisionMax = 100,
+  diloSpriteWidth = 30,
+  diloSpriteHeight = 86,
+  diloSprites = document.createElement("img")
+  
 diloSprites.src = "dilo_sprite.png"
+var charKey;
 
 function sparkleEffect(
   cx,
