@@ -25,8 +25,9 @@ let pixelScale = 20,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
-  diloSprites = document.createElement("img")
-  
+  diloSprites = document.createElement("img"),
+  canvasElement
+
 diloSprites.src = "dilo_sprite.png"
 var charKey;
 
@@ -574,6 +575,7 @@ class State {
         mousePos.x - this.canvasRect.x,
         mousePos.y - this.canvasRect.y)
     } */
+
   }
 
   drawScoreCanvas() {
@@ -738,11 +740,11 @@ window.addEventListener("mousemove", event => {
 function clickListener(state) {
 
   //let canvasElement = document.getElementById("canvas");
-  let canvasElement = state.canvas
+  //console.log(state.canvas)
+  canvasElement = state.canvas
 
   //console.log(canvasElement)
-
-  canvasElement.addEventListener("click", event => {
+  state.canvas.addEventListener("click", event => {
     // calls bullet character class create method
     // remeber to convert event click with bounding rectangle thingamadoo
     console.log(11111)
@@ -752,6 +754,7 @@ function clickListener(state) {
 
 }
 
+
 let counter = 0;
 
 
@@ -759,6 +762,7 @@ function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
+  clickListener(state);
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
