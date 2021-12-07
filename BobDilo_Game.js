@@ -752,7 +752,8 @@ window.addEventListener("mousemove", event => {
 
 
 function clicker(event) {
-  console.log(`clicked ${event.pageX} ${event.pageY}}`)
+
+  console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
 }
 
 function clickListener() {
