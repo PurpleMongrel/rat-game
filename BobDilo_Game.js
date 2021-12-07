@@ -26,7 +26,8 @@ let pixelScale = 20,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
   diloSprites = document.createElement("img"),
-  canvasElement
+  deletableCounter = 0,
+  currentCanvas
 
 diloSprites.src = "dilo_sprite.png"
 var charKey;
@@ -474,6 +475,7 @@ class State {
     this.scoreCx = this.scoreCanvas.getContext("2d");
     this.canvasRect = this.canvas.getBoundingClientRect();
     //this.pointerObj = pointerObj;
+    clickListener(this.canvas)
 
 
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
@@ -525,7 +527,7 @@ class State {
       let newChar = this.characters[i].update(timeElapsed, state)
       newCharacters[i] = newChar;
     }
-
+    state.canvas.removeEventListener("click", clicker)
     return new State(
       this.level,
       newCharacters,
@@ -551,12 +553,23 @@ class State {
     //Decides which screen should be displayed according to level result and game status
     if (this.scoreData.levelIntroDone == true) {
 
+      clickListener(currentCanvas)
+      /* if (deletableCounter == 0) {
+        console.log("fuck yooou")
+        state.canvas.addEventListener("click", event => {
+          console.log(777)
+          console.log(`youuuuu clicked ${event.pageX} ${event.pageY}}`)
+        })
+        deletableCounter += 1;
+      } */
+
       this.drawCanvasBackground(this.level);
 
       for (let char of this.characters) {
         char.draw(this);
       }
     } else {
+      deletableCounter = 0;
       this.drawLevelIntroCanvas()
     }
     if (this.status == "won") {
@@ -737,21 +750,18 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
-function clickListener(state) {
 
+function clicker(event) {
+  console.log("hi")
+  console.log(`youuuuu clicked ${event.pageX} ${event.pageY}}`)
+}
+
+function clickListener() {
   //let canvasElement = document.getElementById("canvas");
   //console.log(state.canvas)
-  canvasElement = state.canvas
-
-  //console.log(canvasElement)
-  state.canvas.addEventListener("click", event => {
-    // calls bullet character class create method
-    // remeber to convert event click with bounding rectangle thingamadoo
-    console.log(11111)
-    console.log(`youuuuu clicked ${event.pageX} ${event.pageY}}`)
-  })
-
-
+  // calls bullet character class create method
+  // remeber to convert event click with bounding rectangle thingamadoo
+  window.addEventListener("click", clicker)
 }
 
 
@@ -762,7 +772,10 @@ function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
-  clickListener(state);
+  clickListener()
+  currentCanvas = state.canvas;
+  console.log(canvas);
+
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
 
@@ -787,7 +800,7 @@ function runLevel(levelsArray, levelIndex) {
 
       if (state.scoreData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
-        clickListener(state);
+
       }
 
       let startScreenCounter = 2000;
@@ -819,7 +832,6 @@ function runLevel(levelsArray, levelIndex) {
 
 
       if (state.status == "playing") {
-
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
 
