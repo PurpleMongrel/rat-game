@@ -27,10 +27,9 @@ let pixelScale = 20,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
   diloSprites = document.createElement("img"),
-  deletableCounter = 0,
-  currentCanvas
+  deletableCounter = 0
 
-diloSprites.src = "dilo_sprite.png"
+  diloSprites.src = "dilo_sprite.png"
 var charKey;
 
 //Creates a randomized "sparkling" of circles drawn around a point
@@ -214,8 +213,20 @@ class GameCanvas {
   }
 }
 
-GameCanvas.prototype.syncState = function (state) {
-  this.clearCanvas();
+GameCanvas.prototype.syncCanvasToState = function (state) {
+  this.drawScoreCanvas(state.gameData);
+
+  if (gameData.levelIntroDone) {
+
+    clickListener(this.canvas);
+
+    this.drawBackground(state.level);
+
+    
+
+  }
+  this.clearCanvas(this.cx);
+
 }
 
 GameCanvas.prototype.clearCanvas = function (cx) {
@@ -223,9 +234,83 @@ GameCanvas.prototype.clearCanvas = function (cx) {
   cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 }
 
-GameCanvas.prototype.drawBackground(level) {
+GameCanvas.prototype.drawScoreCanvas = function (gameData) {
 
 }
+
+GameCanvas.prototype.drawLevelIntroCanvas = function () {
+
+}
+
+GameCanvas.prototype.drawBackground = function (level) {
+  let { levelScroll, height, width } = this.viewport;
+
+  let rowPosition;
+
+  let radius = pixelScale / 2;
+
+  for (let y = height; y >= 0; y--) {
+
+    rowPosition = (30 - y - (levelScroll % 1))
+
+    let pixelRow;
+
+    pixelRow = Math.floor(levelScroll - y)
+
+    for (let x = 0; x < width; x++) {
+
+      if (level.rows[pixelRow]) {
+
+        let color = level.rows[pixelRow][x];
+
+        let shape;
+
+        if (color != "empty") {
+
+          if (color == charKey["*"]) {
+
+            shape = "circle";
+            radius = pixelScale / 2;
+          }
+
+          if (color == charKey["#"]) {
+
+            shape = "square";
+            radius = pixelScale / 2;
+          }
+
+          if (color == "collided") {
+
+            if (level.unparsedRows[pixelRow][x] == "#") {
+              shape = "square";
+              color = redBlock;
+              radius = pixelScale / 2;
+            }
+          }
+        }
+
+        drawBackgroundBlock(
+          this.cx,
+          x,
+          rowPosition,
+          color,
+          color,
+          8,
+          shape,
+          radius);
+      }
+    }
+  }
+}
+
+GameCanvas.prototype.drawLevelPassed = function () {
+
+}
+
+GameCanvas.prototype.drawGameWon = function () {
+
+}
+
 
 class Dilo {
 
@@ -569,15 +654,7 @@ class State {
     //Decides which screen should be displayed according to level result and game status
     if (this.scoreData.levelIntroDone == true) {
 
-      clickListener(currentCanvas)
-      /* if (deletableCounter == 0) {
-        console.log("fuck yooou")
-        state.canvas.addEventListener("click", event => {
-          console.log(777)
-          console.log(`youuuuu clicked ${event.pageX} ${event.pageY}}`)
-        })
-        deletableCounter += 1;
-      } */
+      clickListener(currentCanvas);
 
       this.drawCanvasBackground(this.level);
 
@@ -589,11 +666,9 @@ class State {
       this.drawLevelIntroCanvas()
     }
     if (this.status == "won") {
-
       if (this.scoreData.gameWon == true) {
         this.drawGameWon();
       } else {
-
         this.drawLevelPassed();
       }
     }
@@ -678,63 +753,6 @@ class State {
     this.cx.fill();
   } */
 
-  drawCanvasBackground() {
-
-    this.cx.fillStyle = backgroundBlocks;
-    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-    let { levelScroll, height, width } = this.viewport;
-    let rowPosition;
-    let radius = pixelScale / 2;
-
-    for (let y = height; y >= 0; y--) {
-
-      rowPosition = (30 - y - (levelScroll % 1))
-      let pixelRow;
-      pixelRow = Math.floor(levelScroll - y)
-
-      for (let x = 0; x < width; x++) {
-
-        if (this.level.rows[pixelRow]) {
-
-          let color = this.level.rows[pixelRow][x];
-
-          let shape;
-
-          if (color != "empty") {
-
-            if (color == charKey["*"]) {
-              shape = "circle";
-              radius = pixelScale / 2;
-            }
-
-            if (color == charKey["#"]) {
-              shape = "square";
-              radius = pixelScale / 2;
-            }
-
-            if (color == "collided") {
-
-              if (this.level.unparsedRows[pixelRow][x] == "#") {
-                shape = "square";
-                color = redBlock;
-                radius = pixelScale / 2;
-              }
-            }
-          }
-
-          drawBackgroundBlock(
-            this.cx,
-            x,
-            rowPosition,
-            color,
-            color,
-            8,
-            shape,
-            radius);
-        }
-      }
-    }
-  }
 }
 
 
@@ -791,7 +809,6 @@ function runLevel(levelsArray, levelIndex) {
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
   clickListener()
-  currentCanvas = state.canvas;
   console.log(canvas);
 
   let startScreenTimer = 0;
