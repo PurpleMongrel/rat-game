@@ -188,6 +188,24 @@ let pressedKeys = {
   ArrowRight: false
 }
 
+class ScoreDisplay {
+
+  constructor(
+    scoreCanvas,
+    scoreData,
+  )
+}
+
+class Display {
+
+  constructor(
+    canvas,
+    canvasWidth,
+    canvasHeight
+  )
+}
+
+class 
 
 class Dilo {
 
