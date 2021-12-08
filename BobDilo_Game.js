@@ -195,7 +195,7 @@ class ScoreCanvas {
   ) {
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
-    this.canvas.height = 5 * pixelScale ;
+    this.canvas.height = 5 * pixelScale;
     this.cx = this.canvas.getContext("2d");
     document.appendChild(this.canvas)
   }
@@ -207,13 +207,25 @@ class GameCanvas {
   ) {
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
-    this.canvas.height = 30 * pixelScale; 
+    this.canvas.height = 30 * pixelScale;
     this.cx = this.canvas.getContext("2d");
     document.appendChild(this.canvas);
     this.canvasRect = this.canvas.getBoundingClientRect();
   }
 }
 
+GameCanvas.prototype.syncState = function (state) {
+  this.clearCanvas();
+}
+
+GameCanvas.prototype.clearCanvas = function (cx) {
+  cx.fillStyle = backgroundBlocks;
+  cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+}
+
+GameCanvas.prototype.drawBackground(level) {
+
+}
 
 class Dilo {
 
