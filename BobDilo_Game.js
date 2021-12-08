@@ -1,3 +1,4 @@
+const { timeStamp } = require("console");
 
 
 let pixelScale = 20,
@@ -188,7 +189,7 @@ let pressedKeys = {
   ArrowRight: false
 }
 
-class ScoreDisplay {
+class ScoreCanvasy {
 
   constructor(
     scoreCanvas,
@@ -196,16 +197,17 @@ class ScoreDisplay {
   )
 }
 
-class Display {
-
+class GameCanvas {
   constructor(
-    canvas,
-    canvasWidth,
-    canvasHeight
-  )
+    level
+  ) {
+  this.canvas = document.createElement("canvas");
+  this.canvas.width = level.width * pixelScale;
+  this.canvas.height = 30 * pixelScale;
+  this.cx = this.canvas.getContext("2d");
+  }
 }
 
-class 
 
 class Dilo {
 
@@ -468,16 +470,12 @@ class State {
     scrollRate,
     //pointerObj
   ) {
-
     this.level = level;
     this.characters = characters;
-
     //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
-
     //Canvas on which game is played
     this.canvas = canvas;
-
     //Keeps track of score and collisions small canvas above game canvas
     this.scoreCanvas = scoreCanvas;
     this.canvas.width = level.width * pixelScale;
