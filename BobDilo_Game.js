@@ -26,10 +26,9 @@ let pixelScale = 20,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
-  diloSprites = document.createElement("img"),
-  deletableCounter = 0
+  diloSprites = document.createElement("img")
 
-  diloSprites.src = "dilo_sprite.png"
+diloSprites.src = "dilo_sprite.png"
 var charKey;
 
 //Creates a randomized "sparkling" of circles drawn around a point
@@ -204,38 +203,78 @@ class GameCanvas {
   constructor(
     level
   ) {
+    this.scoreCanvas = document.createElement("canvas");
+    this.scoreCanvas.width = level.width * pixelScale;
+    this.ScoreCanvas.height = 5 * pixelScale;
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
-    this.cx = this.canvas.getContext("2d");
+    this.cxCanvas = this.canvas.getContext("2d");
+    this.cxScore = this.scoreCanvas.getContext("2d");
     document.appendChild(this.canvas);
     this.canvasRect = this.canvas.getBoundingClientRect();
   }
 }
 
 GameCanvas.prototype.syncCanvasToState = function (state) {
+
+  this.clearCanvas(
+    this.cxScore,
+    this.scoreCanvas.width,
+    this.scoreCanvas.height,
+    "#2c1c63");
+
   this.drawScoreCanvas(state.gameData);
 
-  if (gameData.levelIntroDone) {
+  //update viewport
 
-    clickListener(this.canvas);
+  this.clearCanvas(
+    this.cxCanvas,
+    this.canvas.width,
+    this.canvas.height,
+    backgroundBlocks);
 
-    this.drawBackground(state.level);
+  if (state.status == "won") {
 
-    
+    if (state.gameData.gameWon) {
+      this.drawGameWon();
 
+    } else {
+      this.drawLevelPassed();
+    }
+  } else {
+    if (gameData.levelIntroDone) {
+
+      clickListener(this.canvas);
+
+      this.drawBackground(state.level);
+
+      for (let char of state.characters) {
+        char.draw(state)
+      }
+    } else {
+      this.drawLevelIntroCanvas(this.cxCanvas)
+    }
   }
-  this.clearCanvas(this.cx);
-
 }
 
-GameCanvas.prototype.clearCanvas = function (cx) {
+GameCanvas.prototype.clearCanvas = function (
+  cx,
+  width,
+  heigth,
+  color) {
+
   cx.fillStyle = backgroundBlocks;
   cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 }
 
 GameCanvas.prototype.drawScoreCanvas = function (gameData) {
 
+  this.scoreCx.fillStyle = "#2c1c63";
+  this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
+  this.scoreCx.font = `bold 20px serif`;
+  this.scoreCx.fillStyle = "white"
+  this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}      Coins collected: ${this.scoreData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.scoreData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
 }
 
 GameCanvas.prototype.drawLevelIntroCanvas = function () {
@@ -662,7 +701,7 @@ class State {
         char.draw(this);
       }
     } else {
-      deletableCounter = 0;
+
       this.drawLevelIntroCanvas()
     }
     if (this.status == "won") {
