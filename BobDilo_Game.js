@@ -189,22 +189,28 @@ let pressedKeys = {
   ArrowRight: false
 }
 
-class ScoreCanvasy {
-
+class ScoreCanvas {
   constructor(
-    scoreCanvas,
-    scoreData,
-  )
+    level
+  ) {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = level.width * pixelScale;
+    this.canvas.height = 5 * pixelScale ;
+    this.cx = this.canvas.getContext("2d");
+    document.appendChild(this.canvas)
+  }
 }
 
 class GameCanvas {
   constructor(
     level
   ) {
-  this.canvas = document.createElement("canvas");
-  this.canvas.width = level.width * pixelScale;
-  this.canvas.height = 30 * pixelScale;
-  this.cx = this.canvas.getContext("2d");
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = level.width * pixelScale;
+    this.canvas.height = 30 * pixelScale; 
+    this.cx = this.canvas.getContext("2d");
+    document.appendChild(this.canvas);
+    this.canvasRect = this.canvas.getBoundingClientRect();
   }
 }
 
@@ -463,8 +469,6 @@ class State {
     level,
     characters,
     status,
-    canvas,
-    scoreCanvas,
     scoreData,
     levelScroll,
     scrollRate,
@@ -474,21 +478,7 @@ class State {
     this.characters = characters;
     //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
-    //Canvas on which game is played
-    this.canvas = canvas;
-    //Keeps track of score and collisions small canvas above game canvas
-    this.scoreCanvas = scoreCanvas;
-    this.canvas.width = level.width * pixelScale;
-    this.canvas.height = 30 * pixelScale;
-    this.scoreCanvas.width = level.width * pixelScale;
-    this.scoreCanvas.height = 5 * pixelScale;
-    this.canvas.setAttribute("id", "canvas")
-    this.scoreCanvas.setAttribute("id", "scoreCanvas")
-    document.body.appendChild(this.scoreCanvas);
-    document.body.appendChild(this.canvas);
     this.scoreData = scoreData;
-    this.cx = this.canvas.getContext("2d");
-    this.scoreCx = this.scoreCanvas.getContext("2d");
     this.canvasRect = this.canvas.getBoundingClientRect();
     //this.pointerObj = pointerObj;
     clickListener(this.canvas)
@@ -516,8 +506,6 @@ class State {
       level,
       canvasCharacters,
       "playing",
-      document.createElement("canvas"),
-      document.createElement("canvas"),
       {
         coinsCollected: 0,
         blocksTouched: 0,
@@ -786,6 +774,8 @@ let counter = 0;
 
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
+  let gameCanvas = new GameCanvas(level);
+  let scoreCanvas = new ScoreCanvas(level);
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
   clickListener()
