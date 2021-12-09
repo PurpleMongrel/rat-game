@@ -187,18 +187,6 @@ let pressedKeys = {
   ArrowRight: false
 }
 
-class ScoreCanvas {
-  constructor(
-    level
-  ) {
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = level.width * pixelScale;
-    this.canvas.height = 5 * pixelScale;
-    this.cx = this.canvas.getContext("2d");
-    document.appendChild(this.canvas)
-  }
-}
-
 class GameCanvas {
   constructor(
     level
@@ -268,20 +256,54 @@ GameCanvas.prototype.clearCanvas = function (
   cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 }
 
-GameCanvas.prototype.drawScoreCanvas = function (gameData) {
+GameCanvas.prototype.drawScoreCanvas = function (state) {
 
   this.scoreCx.fillStyle = "#2c1c63";
   this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
   this.scoreCx.font = `bold 20px serif`;
   this.scoreCx.fillStyle = "white"
-  this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}      Coins collected: ${this.scoreData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.scoreData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
+  this.scoreCx.fillText(`Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.scoreCanvas.width - 20);
 }
 
-GameCanvas.prototype.drawLevelIntroCanvas = function () {
+GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
+  this.cxCanvas.font = 'bold 100px serif';
 
+  this.cxCanvas.lineWidth = 1.5;
+
+  this.cxCanvas.textAlign = "center";
+
+  this.cxCanvas.strokeStyle = "white";
+
+  this.cxCanvas.fillStyle = charKey["#"];
+
+  this.cxCanvas.strokeText(`Level ${state.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
+
+  if (state.gameData.level == 0) {
+
+    let ruleSpacer = 100;
+    let gameRules = [
+      `Move rat with arrows`,
+      `Aim vicious attacks with mouse`,
+      `Collect ${coinsNeededToWin} cheese coins`,
+      `Limit block collisions to ${blockCollisionMax}`
+    ]
+
+    this.cxCanvas.font = 'bold 25px serif';
+    this.cxCanvas.textAlign = "left";
+
+    for (let rule of gameRules) {
+
+      this.cxCanvas.fillText(rule, 10, this.canvas.height / 4 + ruleSpacer);
+
+      ruleSpacer += 50;
+    }
+
+    ruleSpacer += 50;
+  }
 }
 
 GameCanvas.prototype.drawBackground = function (level) {
+
   let { levelScroll, height, width } = this.viewport;
 
   let rowPosition;
@@ -329,7 +351,7 @@ GameCanvas.prototype.drawBackground = function (level) {
         }
 
         drawBackgroundBlock(
-          this.cx,
+          this.cxCanvas,
           x,
           rowPosition,
           color,
@@ -343,11 +365,22 @@ GameCanvas.prototype.drawBackground = function (level) {
 }
 
 GameCanvas.prototype.drawLevelPassed = function () {
-
+  this.cxCanvas.font = 'bold 80px serif';
+  this.cxCanvas.textAlign = "center";
+  this.cxCanvas.strokeStyle = charKey["#"]
+  this.cxCanvas.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
+  this.cxCanvas.lineWidth = 1.5;
+  this.cxCanvas.fillStyle = "#f75b4a"
+  this.cxCanvas.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
 }
 
 GameCanvas.prototype.drawGameWon = function () {
-
+  this.cxCanvas.fillStyle = backgroundBlocks;
+  this.cxCanvas.font = 'bold 80px serif';
+  this.cxCanvas.textAlign = "center";
+  this.cxCanvas.fillRect(0, 0, this.canvas.width, this.canvas.height)
+  this.cxCanvas.fillStyle = "white";
+  this.cxCanvas.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
 }
 
 
@@ -429,21 +462,21 @@ class Dilo {
       state
     );
 
-    //Updates scoreData with how many coins and blocks have been collided with
+    //Updates gameData with how many coins and blocks have been collided with
     //Sets status to lost if blocks touched exceeds blockCollisionMax 
     for (let block of collided) {
 
       if (state.level.rows[block.row][block.column] != "collided") {
 
         if (state.level.unparsedRows[block.row][block.column] == "#") {
-          state.scoreData.blocksTouched++;
+          state.gameData.blocksTouched++;
 
-          if (state.scoreData.blocksTouched > blockCollisionMax) {
+          if (state.gameData.blocksTouched > blockCollisionMax) {
             state.status = "lost";
           }
         }
         if (state.level.unparsedRows[block.row][block.column] == "*") {
-          state.scoreData.coinsCollected++;
+          state.gameData.coinsCollected++;
         }
 
         state.level.rows[block.row][block.column] = "collided";
@@ -605,7 +638,7 @@ class State {
     level,
     characters,
     status,
-    scoreData,
+    gameData,
     levelScroll,
     scrollRate,
     //pointerObj
@@ -614,9 +647,7 @@ class State {
     this.characters = characters;
     //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
-    this.scoreData = scoreData;
-    this.canvasRect = this.canvas.getBoundingClientRect();
-    //this.pointerObj = pointerObj;
+    this.gameData = gameData;
     clickListener(this.canvas)
 
 
@@ -672,9 +703,7 @@ class State {
       this.level,
       newCharacters,
       this.status,
-      this.canvas,
-      this.scoreCanvas,
-      this.scoreData,
+      this.gameData,
       this.viewport.levelScroll,
       this.scrollRate,
       {
@@ -691,7 +720,7 @@ class State {
     this.drawScoreCanvas();
 
     //Decides which screen should be displayed according to level result and game status
-    if (this.scoreData.levelIntroDone == true) {
+    if (this.gameData.levelIntroDone == true) {
 
       clickListener(currentCanvas);
 
@@ -705,7 +734,7 @@ class State {
       this.drawLevelIntroCanvas()
     }
     if (this.status == "won") {
-      if (this.scoreData.gameWon == true) {
+      if (this.gameData.gameWon == true) {
         this.drawGameWon();
       } else {
         this.drawLevelPassed();
@@ -713,7 +742,7 @@ class State {
     }
 
     //Might use later 
-    /* if (mousePos && this.scoreData.levelIntroDone) {
+    /* if (mousePos && this.gameData.levelIntroDone) {
       this.drawPointer(
         mousePos.x - this.canvasRect.x,
         mousePos.y - this.canvasRect.y)
@@ -726,7 +755,7 @@ class State {
     this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
     this.scoreCx.font = `bold 20px serif`;
     this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`Level: ${this.scoreData.level + 1}      Coins collected: ${this.scoreData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.scoreData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
+    this.scoreCx.fillText(`Level: ${this.gameData.level + 1}      Coins collected: ${this.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
   }
 
   drawLevelIntroCanvas() {
@@ -737,9 +766,9 @@ class State {
     this.cx.textAlign = "center";
     this.cx.strokeStyle = "white";
     this.cx.fillStyle = charKey["#"];
-    this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
+    this.cx.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
 
-    if (this.scoreData.level == 0) {
+    if (this.gameData.level == 0) {
 
       let ruleSpacer = 100;
       let gameRules = [
@@ -769,7 +798,7 @@ class State {
     this.cx.font = 'bold 80px serif';
     this.cx.textAlign = "center";
     this.cx.strokeStyle = charKey["#"]
-    this.cx.strokeText(`Level ${this.scoreData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
+    this.cx.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
     this.cx.lineWidth = 1.5;
     this.cx.fillStyle = "#f75b4a"
     this.cx.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
@@ -844,7 +873,6 @@ let counter = 0;
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let gameCanvas = new GameCanvas(level);
-  let scoreCanvas = new ScoreCanvas(level);
   let levelObj = new Level(levelsArray[levelIndex]);
   let state = State.start(levelObj, levelsArray.length, levelIndex);
   clickListener()
@@ -872,29 +900,29 @@ function runLevel(levelsArray, levelIndex) {
       if (timeElapsed > 17) timeElapsed = 17;
       startScreenTimer += timeElapsed;
 
-      if (state.scoreData.levelIntroDone == true) {
+      if (state.gameData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
 
       }
 
       let startScreenCounter = 2000;
       if (
-        state.scoreData.levelIntroDone == false &&
-        state.scoreData.level == 0
+        state.gameData.levelIntroDone == false &&
+        state.gameData.level == 0
       ) {
         startScreenCounter = 6000;
       }
 
       if (startScreenTimer > startScreenCounter) {
-        state.scoreData.levelIntroDone = true;
+        state.gameData.levelIntroDone = true;
       }
 
-      state.syncCanvas(timeElapsed, state);
+      gameCanvas.syncCanvasToState(state);
       timePreviousFrame = timeCurrentFrame;
 
       if (state.viewport.levelScroll < 30) {
 
-        if (state.scoreData.coinsCollected < coinsNeededToWin) {
+        if (state.gameData.coinsCollected < coinsNeededToWin) {
           state.status = "lost"
 
         } else {
@@ -923,10 +951,10 @@ function runLevel(levelsArray, levelIndex) {
         //resolve(state.status);
       } else {
 
-        if ((state.scoreData.level == state.scoreData.levelsLength - 1)
+        if ((state.gameData.level == state.gameData.levelsLength - 1)
           && (state.status = "won")) {
 
-          state.scoreData.gameWon = true;
+          state.gameData.gameWon = true;
 
           if (gameWonTimer < 1) {
             gameWonTimer += 0.01;
