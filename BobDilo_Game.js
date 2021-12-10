@@ -19,7 +19,7 @@ let pixelScale = 20,
   originalDiloAcceleration = 0.02,
   diloDeceleration = 0.02,
   diloMaxSpeed = 0.3,
-  coinsNeededToWin = 10,
+  coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
@@ -195,16 +195,19 @@ class GameCanvas {
     this.scoreCanvas = document.createElement("canvas");
     this.scoreCanvas.width = level.width * pixelScale;
     this.scoreCanvas.height = 5 * pixelScale;
-    this.scoreCanvas.width = 30 * pixelScale;
     this.cxCanvas = this.canvas.getContext("2d");
     this.cxScore = this.scoreCanvas.getContext("2d");
-    document.body.appendChild(this.canvas);
     document.body.appendChild(this.scoreCanvas);
+    document.body.appendChild(this.canvas);
     this.canvasRect = this.canvas.getBoundingClientRect();
+    this.canvas.setAttribute("id", "canvas");
+    this.scoreCanvas.setAttribute("id", "scoreCanvas")
   }
 }
 
 GameCanvas.prototype.syncCanvasToState = function (state) {
+
+//state.canvas.removeEventListener("click", clicker)
 
   this.clearCanvas(
     this.cxScore,
@@ -228,17 +231,17 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
       this.drawGameWon();
 
     } else {
-      this.drawLevelPassed();
+      this.drawLevelPassed(state);
     }
   } else {
     if (state.gameData.levelIntroDone) {
 
-      clickListener(this.canvas);
+      //clickListener(this.canvas);
 
-      this.drawBackground(state.level);
+      this.drawBackground(state);
 
       for (let char of state.characters) {
-        char.draw(state)
+        char.draw(this)
       }
     } else {
       this.drawLevelIntroCanvas(state)
@@ -367,11 +370,11 @@ GameCanvas.prototype.drawBackground = function (state) {
   }
 }
 
-GameCanvas.prototype.drawLevelPassed = function () {
+GameCanvas.prototype.drawLevelPassed = function (state) {
   this.cxCanvas.font = 'bold 80px serif';
   this.cxCanvas.textAlign = "center";
   this.cxCanvas.strokeStyle = charKey["#"]
-  this.cxCanvas.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
+  this.cxCanvas.strokeText(`Level ${state.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
   this.cxCanvas.lineWidth = 1.5;
   this.cxCanvas.fillStyle = "#f75b4a"
   this.cxCanvas.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
@@ -404,6 +407,9 @@ class Dilo {
 
     let newX = this.position.x;
     let newY = this.position.y;
+
+    let canvasWidth = state.level.width * pixelScale;
+    let canvasHeight = 30 * pixelScale;
 
     if (pressedKeys.ArrowRight == true) {
       if (this.speed.right < diloMaxSpeed) {
@@ -447,14 +453,14 @@ class Dilo {
     if (newX < diloFigureRadius) {
       newX = diloFigureRadius;
     }
-    if (newX > state.canvas.width - diloFigureRadius) {
-      newX = state.canvas.width - diloFigureRadius;
+    if (newX > canvasWidth - diloFigureRadius) {
+      newX = canvasWidth  - diloFigureRadius;
     };
     if (newY < diloFigureRadius) {
       newY = diloFigureRadius;
     };
-    if (newY > state.canvas.height - diloFigureRadius) {
-      newY = state.canvas.height - diloFigureRadius
+    if (newY > canvasHeight - diloFigureRadius) {
+      newY = canvasHeight - diloFigureRadius
     };
     //End of Dilo canvas boundary limits
 
@@ -490,16 +496,16 @@ class Dilo {
   }
 
   //Draws Dilo sprite on canvas
-  draw(state) {
+  draw(gameCanvas) {
 
-    state.cx.shadowColor = "#f07373";
+    gameCanvas.cxCanvas.shadowColor = "#f07373";
     let spriteTile = Math.floor(Date.now() / 50) % 5;
 
-    state.cx.save();
+    gameCanvas.cxCanvas.save();
 
     // tilt dilo sprite according to mouse position
-    let mouseX = mousePos.x - state.canvasRect.x;
-    let mouseY = mousePos.y - state.canvasRect.y;
+    let mouseX = mousePos.x - gameCanvas.canvasRect.x;
+    let mouseY = mousePos.y - gameCanvas.canvasRect.y;
 
     if (mousePos) {
       let diloAngleRad = Math.atan2(
@@ -507,12 +513,12 @@ class Dilo {
         mouseX - this.position.x
       );
 
-      state.cx.translate(this.position.x, this.position.y)
-      state.cx.rotate(diloAngleRad += Math.PI / 2);
-      state.cx.translate(-this.position.x, -this.position.y)
+      gameCanvas.cxCanvas.translate(this.position.x, this.position.y)
+      gameCanvas.cxCanvas.rotate(diloAngleRad += Math.PI / 2);
+      gameCanvas.cxCanvas.translate(-this.position.x, -this.position.y)
     }
     //draw dilo sprite from png
-    state.cx.drawImage(
+    gameCanvas.cxCanvas.drawImage(
       diloSprites,
       spriteTile * diloSpriteWidth,
       0,
@@ -523,9 +529,10 @@ class Dilo {
       diloSpriteWidth,
       diloSpriteHeight,
     )
-    state.cx.restore();
+    gameCanvas.cxCanvas.restore();
+
     /*   drawCenteredCircle(
-        state.cx,
+        gameCanvas.cxCanvas,
         this.position.x,
         this.position.y,
         diloFigureRadius,
@@ -551,10 +558,10 @@ class BlackHole {
     return new BlackHole({ "x": this.position.x, "y": newY })
   }
 
-  draw(state) {
+  draw(gameCanvas) {
 
     sparkleEffect(
-      state.cx,
+      gameCanvas.cxCanvas,
       this.position.x,
       this.position.y,
       5,
@@ -655,7 +662,6 @@ class State {
 
     this.gameData = gameData;
 
-    clickListener(this.canvas)
 
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
@@ -696,29 +702,29 @@ class State {
   }
 
   update(timeElapsed, state) {
+
     if (counter % 300 == 0) {
       console.log(state);
     }
+
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
+
     let newCharacters = [];
 
     for (let i = 0; i < this.characters.length; i++) {
-      let newChar = this.characters[i].update(timeElapsed, state)
+
+      let newChar = this.characters[i].update(timeElapsed, state);
+
       newCharacters[i] = newChar;
     }
-    state.canvas.removeEventListener("click", clicker)
+
     return new State(
       this.level,
       newCharacters,
       this.status,
       this.gameData,
       this.viewport.levelScroll,
-      this.scrollRate,
-      {
-        x: this.canvasRect.x + this.canvas.width / 2 + 100,
-        y: this.canvasRect.y + this.canvas.height / 2
-      }
-
+      this.scrollRate
     );
   }
 
@@ -769,12 +775,12 @@ function clicker(event) {
   console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
 }
 
-function clickListener() {
+function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
   //console.log(state.canvas)
   // calls bullet character class create method
   // remeber to convert event click with bounding rectangle thingamadoo
-  window.addEventListener("click", clicker)
+  gameCanvas.canvas.addEventListener("click", clicker)
 }
 
 
@@ -787,7 +793,7 @@ function runLevel(levelsArray, levelIndex) {
   let gameCanvas = new GameCanvas(levelObj);
 
   let state = State.start(levelObj, levelsArray.length, levelIndex);
-  clickListener()
+  clickListener(gameCanvas)
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
@@ -872,14 +878,14 @@ function runLevel(levelsArray, levelIndex) {
             requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
 
           } else {
-            state.canvas.remove();
-            state.scoreCanvas.remove();
+            gameCanvas.canvas.remove();
+            gameCanvas.scoreCanvas.remove();
             resolve(state.status);
           }
         } else {
           diloColor = originalDiloColor;
-          state.canvas.remove();
-          state.scoreCanvas.remove();
+          gameCanvas.canvas.remove();
+          gameCanvas.scoreCanvas.remove();
           resolve(state.status);
         }
       }
