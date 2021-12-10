@@ -1,6 +1,3 @@
-const { timeStamp } = require("console");
-
-
 let pixelScale = 20,
   diloFigureHeight = 1.4 * pixelScale,
   diloFigureWidth = 30,
@@ -26,10 +23,11 @@ let pixelScale = 20,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
-  diloSprites = document.createElement("img")
+  diloSprites = document.createElement("img");
 
 diloSprites.src = "dilo_sprite.png"
-var charKey;
+
+var charKey = 0;
 
 //Creates a randomized "sparkling" of circles drawn around a point
 function sparkleEffect(
@@ -191,15 +189,17 @@ class GameCanvas {
   constructor(
     level
   ) {
-    this.scoreCanvas = document.createElement("canvas");
-    this.scoreCanvas.width = level.width * pixelScale;
-    this.ScoreCanvas.height = 5 * pixelScale;
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
+    this.scoreCanvas = document.createElement("canvas");
+    this.scoreCanvas.width = level.width * pixelScale;
+    this.scoreCanvas.height = 5 * pixelScale;
+    this.scoreCanvas.width = 30 * pixelScale;
     this.cxCanvas = this.canvas.getContext("2d");
     this.cxScore = this.scoreCanvas.getContext("2d");
-    document.appendChild(this.canvas);
+    document.body.appendChild(this.canvas);
+    document.body.appendChild(this.scoreCanvas);
     this.canvasRect = this.canvas.getBoundingClientRect();
   }
 }
@@ -212,7 +212,7 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
     this.scoreCanvas.height,
     "#2c1c63");
 
-  this.drawScoreCanvas(state.gameData);
+  this.drawScoreCanvas(state);
 
   //update viewport
 
@@ -231,7 +231,7 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
       this.drawLevelPassed();
     }
   } else {
-    if (gameData.levelIntroDone) {
+    if (state.gameData.levelIntroDone) {
 
       clickListener(this.canvas);
 
@@ -241,7 +241,7 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
         char.draw(state)
       }
     } else {
-      this.drawLevelIntroCanvas(this.cxCanvas)
+      this.drawLevelIntroCanvas(state)
     }
   }
 }
@@ -258,11 +258,11 @@ GameCanvas.prototype.clearCanvas = function (
 
 GameCanvas.prototype.drawScoreCanvas = function (state) {
 
-  this.scoreCx.fillStyle = "#2c1c63";
-  this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
-  this.scoreCx.font = `bold 20px serif`;
-  this.scoreCx.fillStyle = "white"
-  this.scoreCx.fillText(`Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.scoreCanvas.width - 20);
+  this.cxScore.fillStyle = "#2c1c63";
+  this.cxScore.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
+  this.cxScore.font = `bold 20px serif`;
+  this.cxScore.fillStyle = "white"
+  this.cxScore.fillText(`Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.scoreCanvas.width - 20);
 }
 
 GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
@@ -302,9 +302,12 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
   }
 }
 
-GameCanvas.prototype.drawBackground = function (level) {
+GameCanvas.prototype.drawBackground = function (state) {
 
-  let { levelScroll, height, width } = this.viewport;
+  let level = state.level;
+
+
+  let { levelScroll, height, width } = state.viewport;
 
   let rowPosition;
 
@@ -644,20 +647,25 @@ class State {
     //pointerObj
   ) {
     this.level = level;
+
     this.characters = characters;
+
     //Tracks if current level is "playing", "won", or "lost"
     this.status = status;
-    this.gameData = gameData;
-    clickListener(this.canvas)
 
+    this.gameData = gameData;
+
+    clickListener(this.canvas)
 
     //Keeps track of game canvas edges relative to level plan scrolling across canvas
     this.viewport = {
       levelScroll: levelScroll,
-      height: this.canvas.height / pixelScale,
-      width: this.canvas.width / pixelScale
+      height: 30,
+      width: level.width
     }
+
     this.scrollRate = scrollRate;
+
   }
 
   static start(level, levelsLength, levelIndex) {
@@ -715,103 +723,6 @@ class State {
   }
 
   //Uses elapsed time and state to draw game canvas and score canvas. Alternates between level start, level passed, game, and game won
-  syncCanvas(timeElapsed, state) {
-
-    this.drawScoreCanvas();
-
-    //Decides which screen should be displayed according to level result and game status
-    if (this.gameData.levelIntroDone == true) {
-
-      clickListener(currentCanvas);
-
-      this.drawCanvasBackground(this.level);
-
-      for (let char of this.characters) {
-        char.draw(this);
-      }
-    } else {
-
-      this.drawLevelIntroCanvas()
-    }
-    if (this.status == "won") {
-      if (this.gameData.gameWon == true) {
-        this.drawGameWon();
-      } else {
-        this.drawLevelPassed();
-      }
-    }
-
-    //Might use later 
-    /* if (mousePos && this.gameData.levelIntroDone) {
-      this.drawPointer(
-        mousePos.x - this.canvasRect.x,
-        mousePos.y - this.canvasRect.y)
-    } */
-
-  }
-
-  drawScoreCanvas() {
-    this.scoreCx.fillStyle = "#2c1c63";
-    this.scoreCx.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
-    this.scoreCx.font = `bold 20px serif`;
-    this.scoreCx.fillStyle = "white"
-    this.scoreCx.fillText(`Level: ${this.gameData.level + 1}      Coins collected: ${this.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${this.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.canvas.width - 20);
-  }
-
-  drawLevelIntroCanvas() {
-    this.cx.fillStyle = backgroundBlocks;
-    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-    this.cx.font = 'bold 100px serif';
-    this.cx.lineWidth = 1.5;
-    this.cx.textAlign = "center";
-    this.cx.strokeStyle = "white";
-    this.cx.fillStyle = charKey["#"];
-    this.cx.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
-
-    if (this.gameData.level == 0) {
-
-      let ruleSpacer = 100;
-      let gameRules = [
-        `Move rat with arrows`,
-        `Aim vicious attacks with mouse`,
-        `Collect ${coinsNeededToWin} cheese coins`,
-        `Limit block collisions to ${blockCollisionMax}`
-      ]
-
-      this.cx.font = 'bold 25px serif';
-      this.cx.textAlign = "left";
-
-      for (let rule of gameRules) {
-
-        this.cx.fillText(rule, 10, this.canvas.height / 4 + ruleSpacer);
-
-        ruleSpacer += 50;
-      }
-
-      ruleSpacer += 50;
-    }
-  }
-
-  drawLevelPassed() {
-    /* this.cx.fillStyle = backgroundBlocks;
-    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height) */
-    this.cx.font = 'bold 80px serif';
-    this.cx.textAlign = "center";
-    this.cx.strokeStyle = charKey["#"]
-    this.cx.strokeText(`Level ${this.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
-    this.cx.lineWidth = 1.5;
-    this.cx.fillStyle = "#f75b4a"
-    this.cx.fillText(`PASSED`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
-  }
-
-  drawGameWon() {
-    this.cx.fillStyle = backgroundBlocks;
-    this.cx.font = 'bold 80px serif';
-    this.cx.textAlign = "center";
-    this.cx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-    this.cx.fillStyle = "white";
-    this.cx.fillText(`YOU WIN!`, this.canvas.width / 2, this.canvas.height / 3 + 80, this.canvas.width);
-  }
 
   //Might use again if creating custom crosshair pointer
   /* drawPointer(x, y) {
@@ -869,14 +780,14 @@ function clickListener() {
 
 let counter = 0;
 
-
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
-  let gameCanvas = new GameCanvas(level);
   let levelObj = new Level(levelsArray[levelIndex]);
+  
+  let gameCanvas = new GameCanvas(levelObj);
+
   let state = State.start(levelObj, levelsArray.length, levelIndex);
   clickListener()
-  console.log(canvas);
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
