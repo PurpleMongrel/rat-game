@@ -507,6 +507,7 @@ class Dilo {
     let mouseX = mousePos.x - gameCanvas.canvasRect.x;
     let mouseY = mousePos.y - gameCanvas.canvasRect.y;
 
+    
     if (counter % 500 == 0) {
       console.log(
       `mousePos:  
@@ -518,6 +519,7 @@ class Dilo {
         x: ${this.position.x}
         y: ${this.position.y}`
         );
+        console.log(gameCanvas.canvasRect)
     }
 
     if (mousePos) {
@@ -793,7 +795,7 @@ function clickListener(gameCanvas) {
   //console.log(state.canvas)
   // calls bullet character class create method
   // remeber to convert event click with bounding rectangle thingamadoo
-  gameCanvas.canvas.addEventListener("click", clicker)
+  window.addEventListener("click", clicker)
 }
 
 
