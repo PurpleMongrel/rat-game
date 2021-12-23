@@ -8,9 +8,13 @@ let pixelScale = 20,
   levelScrollRate = 0.003,
   redBlock = "#f75b4a",
   backgroundColors = {
-    0: "#191038",
+    0: "black",
+    1: "black",
+    2: "black"
+    /* 0: "#191038",
     1: "#346557",
-    2: "#3c4e72"
+    2: "#3c4e72" */
+    
   },
   backgroundBlocks,
   diloColor = "#f07373",
