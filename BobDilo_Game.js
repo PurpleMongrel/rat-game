@@ -112,8 +112,8 @@ function drawCenteredCircle(
   yPos,
   radius,
   fillStyle,
-  shadowColor,
-  shadowBlur
+  shadowColor = "",
+  shadowBlur = ""
 ) {
   cx.fillStyle = fillStyle;
   cx.shadowColor = shadowColor;
@@ -199,7 +199,6 @@ class GameCanvas {
     this.cxScore = this.scoreCanvas.getContext("2d");
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
-    this.canvasRect = this.canvas.getBoundingClientRect();
     this.canvas.setAttribute("id", "canvas");
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
   }
@@ -504,23 +503,18 @@ class Dilo {
     gameCanvas.cxCanvas.save();
 
     // tilt dilo sprite according to mouse position
-    let mouseX = mousePos.x - gameCanvas.canvasRect.x;
-    let mouseY = mousePos.y - gameCanvas.canvasRect.y;
+    let clientRect = gameCanvas.canvas.getBoundingClientRect()
 
+    let mouseX = mousePos.x - clientRect.left;
+    let mouseY = mousePos.y - clientRect.y;
     
-    if (counter % 500 == 0) {
-      console.log(
-      `mousePos:  
-      x:${mousePos.x - gameCanvas.canvasRect.x} 
-      y: ${mousePos.y - gameCanvas.canvasRect.y}`
-      );
-      console.log(
-        `dilo.position:  
-        x: ${this.position.x}
-        y: ${this.position.y}`
-        );
-        console.log(gameCanvas.canvasRect)
-    }
+    /* drawCenteredCircle(
+      gameCanvas.cxCanvas,
+      mouseX,
+      mouseY,
+      5,
+      "red"
+    ) */
 
     if (mousePos) {
       let diloAngleRad = Math.atan2(
