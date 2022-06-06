@@ -1,9 +1,9 @@
-let scaleMultiplier = 2, 
+let scaleMultiplier = 1.5,
   pixelScale = 20 * scaleMultiplier,
   diloFigureHeight = 1.4 * pixelScale * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
   diloFigureRadius = 15 * scaleMultiplier,
-  diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier},
+  diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
   levelScrollRate = 0.01,
@@ -13,11 +13,14 @@ let scaleMultiplier = 2,
     1: "#000000",
     2: "#000000"
   },
-  scoreBGColor = "#098180",
+  scoreBGColor = "#000000",
   backgroundBlocks,
   diloColor = "#f07373",
   originalDiloColor = "#f07373",
-  scoreFontSize = 20 * scaleMultiplier;
+  scoreFontSize = 20 * scaleMultiplier,
+  scoreFontColor = "#048504",
+  introFontSize = 80 * scaleMultiplier,
+  introFontColor = "#1132D1",
   diloAcceleration = 0.04,
   originalDiloAcceleration = 0.04,
   diloDeceleration = 0.04,
@@ -210,7 +213,7 @@ class GameCanvas {
 
 GameCanvas.prototype.syncCanvasToState = function (state) {
 
-//state.canvas.removeEventListener("click", clicker)
+  //state.canvas.removeEventListener("click", clicker)
 
   this.clearCanvas(
     this.cxScore,
@@ -266,23 +269,30 @@ GameCanvas.prototype.drawScoreCanvas = function (state) {
 
   this.cxScore.fillStyle = scoreBGColor;
   this.cxScore.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
-  this.cxScore.font =  scoreFontSize + "px wheaton";
-  this.cxScore.fillStyle = "white"
-  this.cxScore.fillText(`Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.scoreCanvas.width - 20);
+  this.cxScore.font = scoreFontSize + "px wheaton";
+  this.cxScore.fillStyle = scoreFontColor;
+  var text = `Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`;
+  var blur = 5 * scaleMultiplier;
+  this.cxScore.shadowColor = scoreFontColor;
+  this.cxScore.shadowBlur = blur;
+  this.cxScore.fillText(text, 10, 50, this.scoreCanvas.width - 20);
 }
 
 GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
-  this.cxCanvas.font = 'bold 100px serif';
+  this.cxCanvas.font = introFontSize + "px wheaton";
 
-  this.cxCanvas.lineWidth = 1.5;
+  this.cxCanvas.lineWidth = 2.5 * scaleMultiplier;
 
   this.cxCanvas.textAlign = "center";
 
-  this.cxCanvas.strokeStyle = "white";
+  this.cxCanvas.strokeStyle = introFontColor;
 
   this.cxCanvas.fillStyle = charKey["#"];
-
-  this.cxCanvas.strokeText(`Level ${state.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 4);
+  var text = `Level ${state.gameData.level + 1}`;
+  var blur = 5.5 * scaleMultiplier;
+  this.cxCanvas.shadowColor = introFontColor;
+  this.cxCanvas.shadowBlur = blur;
+  this.cxCanvas.strokeText(text, this.canvas.width / 2, this.canvas.height / 4);
 
   if (state.gameData.level == 0) {
 
@@ -296,9 +306,12 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
 
     this.cxCanvas.font = 'bold 25px serif';
     this.cxCanvas.textAlign = "left";
-
+    this.cxCanvas.fillStyle = scoreFontColor;
     for (let rule of gameRules) {
 
+      var blur = 5.5 * scaleMultiplier;
+      this.cxCanvas.shadowColor = "scoreFontColor";
+      this.cxCanvas.shadowBlur = blur;
       this.cxCanvas.fillText(rule, 10, this.canvas.height / 4 + ruleSpacer);
 
       ruleSpacer += 50;
@@ -457,7 +470,7 @@ class Dilo {
       newX = diloFigureRadius;
     }
     if (newX > canvasWidth - diloFigureRadius) {
-      newX = canvasWidth  - diloFigureRadius;
+      newX = canvasWidth - diloFigureRadius;
     };
     if (newY < diloFigureRadius) {
       newY = diloFigureRadius;
@@ -792,7 +805,7 @@ let counter = 0;
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
-  
+
   let gameCanvas = new GameCanvas(levelObj);
 
   let state = State.start(levelObj, levelsArray.length, levelIndex);

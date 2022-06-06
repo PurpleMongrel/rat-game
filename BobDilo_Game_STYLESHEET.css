@@ -1,4 +1,7 @@
-body {background-color: rgb(19, 15, 32);}
+body {
+  background-color: #000107;
+  margin-top: 5%;
+}
 #canvas {
   padding-left: 0;
   padding-right: 0;
@@ -6,6 +9,15 @@ body {background-color: rgb(19, 15, 32);}
   margin-right: auto;
   display: block;
   cursor: crosshair;
+  box-shadow: 
+    0 0 1px #fff,
+    0 0 2px #fff,
+    0 0 5px #fff,
+    0 0 5px #910505,
+    0 0 10px #910505,
+    0 0 10px #910505,
+    0 0 20px #910505,
+    0 0 20px #910505;
 
 }
 
@@ -16,7 +28,15 @@ body {background-color: rgb(19, 15, 32);}
   margin-right: auto;
   display: block;
   background:  #2c1c63;
-  font-family: arcade;
+  box-shadow: 
+    0 0 1px #fff,
+    0 0 2px #fff,
+    0 0 5px #fff,
+    0 0 5px #910505,
+    0 0 10px #910505,
+    0 0 10px #910505,
+    0 0 20px #910505,
+    0 0 20px #910505;
 }
 
 @font-face{
