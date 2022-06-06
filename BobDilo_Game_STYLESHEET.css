@@ -1,4 +1,7 @@
-body {background-color: rgb(19, 15, 32);}
+body {
+  background-color: #000107;
+  margin-top: 5%;
+}
 #canvas {
   padding-left: 0;
   padding-right: 0;
@@ -6,6 +9,16 @@ body {background-color: rgb(19, 15, 32);}
   margin-right: auto;
   display: block;
   cursor: crosshair;
+  box-shadow: 
+    0 0 1px #f84c4c,
+    0 0 2px #f84c4c,
+    0 0 5px #f84c4c,
+    0 0 5px #910505,
+    0 0 10px #910505,
+    0 0 10px #910505,
+    0 0 20px #910505,
+    0 0 20px #910505;
+
 }
 
 #scoreCanvas{
@@ -15,4 +28,28 @@ body {background-color: rgb(19, 15, 32);}
   margin-right: auto;
   display: block;
   background:  #2c1c63;
+  box-shadow: 
+    0 0 1px #f84c4c,
+    0 0 2px #f84c4c,
+    0 0 5px #f84c4c,
+    0 0 5px #910505,
+    0 0 10px #910505,
+    0 0 10px #910505,
+    0 0 20px #910505,
+    0 0 20px #910505;
+}
+
+@font-face{
+  font-family: "arcade";
+  src: url("fonts/ARCADECLASSIC.TTF") format("truetype");
+}
+
+@font-face{
+  font-family: "phreak";
+  src: url("fonts/VIDEOPHREAK.ttf") format("truetype");
+}
+
+@font-face{
+  font-family: "wheaton";
+  src: url("fonts/fonts/wheatonCapitals.otf") format("truetype");
 }
