@@ -1,24 +1,27 @@
-let pixelScale = 20,
-  diloFigureHeight = 1.4 * pixelScale,
-  diloFigureWidth = 30,
-  diloFigureRadius = 15,
-  diloSizeObj = { "x": 15, "y": 86 },
+let scaleMultiplier = 2, 
+  pixelScale = 20 * scaleMultiplier,
+  diloFigureHeight = 1.4 * pixelScale * scaleMultiplier,
+  diloFigureWidth = 30 * scaleMultiplier,
+  diloFigureRadius = 15 * scaleMultiplier,
+  diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier},
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
   levelScrollRate = 0.01,
   redBlock = "#f75b4a",
   backgroundColors = {
-    0: "#191038",
-    1: "#346557",
-    2: "#3c4e72"
+    0: "#000000",
+    1: "#000000",
+    2: "#000000"
   },
+  scoreBGColor = "#098180",
   backgroundBlocks,
   diloColor = "#f07373",
   originalDiloColor = "#f07373",
-  diloAcceleration = 0.02,
-  originalDiloAcceleration = 0.02,
-  diloDeceleration = 0.02,
-  diloMaxSpeed = 0.3,
+  scoreFontSize = 20 * scaleMultiplier;
+  diloAcceleration = 0.04,
+  originalDiloAcceleration = 0.04,
+  diloDeceleration = 0.04,
+  diloMaxSpeed = 0.6,
   coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
@@ -261,9 +264,9 @@ GameCanvas.prototype.clearCanvas = function (
 
 GameCanvas.prototype.drawScoreCanvas = function (state) {
 
-  this.cxScore.fillStyle = "#2c1c63";
+  this.cxScore.fillStyle = scoreBGColor;
   this.cxScore.fillRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
-  this.cxScore.font = `bold 20px serif`;
+  this.cxScore.font =  scoreFontSize + "px wheaton";
   this.cxScore.fillStyle = "white"
   this.cxScore.fillText(`Level: ${state.gameData.level + 1}      Coins collected: ${state.gameData.coinsCollected}/${coinsNeededToWin}      Block collisions: ${state.gameData.blocksTouched}/${blockCollisionMax}`, 10, 50, this.scoreCanvas.width - 20);
 }
@@ -526,8 +529,8 @@ class Dilo {
       diloSpriteHeight,
       this.position.x,
       this.position.y,
-      diloSpriteWidth,
-      diloSpriteHeight,
+      diloSpriteWidth * scaleMultiplier,
+      diloSpriteHeight * scaleMultiplier,
     )
     gameCanvas.cxCanvas.restore();
 
@@ -583,8 +586,8 @@ class BlackHole {
 //Charkeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of charkeys corresponds to a level (with colors of background elements changing)
 var charKeys = {
   0: {
-    "#": "#409486",
-    "*": "#ffd666",
+    "#": "#10A623",
+    "*": "#FE9A39",
     ".": "empty",
     "D": Dilo,
     "b": BlackHole
@@ -827,7 +830,7 @@ function runLevel(levelsArray, levelIndex) {
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
       ) {
-        startScreenCounter = 6000;
+        startScreenCounter = 2000;
       }
 
       if (startScreenTimer > startScreenCounter) {
