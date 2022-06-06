@@ -5,22 +5,18 @@ let pixelScale = 20,
   diloSizeObj = { "x": 15, "y": 86 },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
-  levelScrollRate = 0.003,
+  levelScrollRate = 0.01,
   redBlock = "#f75b4a",
   backgroundColors = {
-    0: "black",
-    1: "black",
-    2: "black"
-    /* 0: "#191038",
+    0: "#191038",
     1: "#346557",
-    2: "#3c4e72" */
-    
+    2: "#3c4e72"
   },
   backgroundBlocks,
   diloColor = "#f07373",
   originalDiloColor = "#f07373",
-  diloAcceleration = 0.01,
-  originalDiloAcceleration = 0.01,
+  diloAcceleration = 0.02,
+  originalDiloAcceleration = 0.02,
   diloDeceleration = 0.02,
   diloMaxSpeed = 0.3,
   coinsNeededToWin = 0,
@@ -116,8 +112,8 @@ function drawCenteredCircle(
   yPos,
   radius,
   fillStyle,
-  shadowColor = "",
-  shadowBlur = ""
+  shadowColor,
+  shadowBlur
 ) {
   cx.fillStyle = fillStyle;
   cx.shadowColor = shadowColor;
@@ -203,6 +199,7 @@ class GameCanvas {
     this.cxScore = this.scoreCanvas.getContext("2d");
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
+    this.canvasRect = this.canvas.getBoundingClientRect();
     this.canvas.setAttribute("id", "canvas");
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
   }
@@ -210,7 +207,7 @@ class GameCanvas {
 
 GameCanvas.prototype.syncCanvasToState = function (state) {
 
-  //state.canvas.removeEventListener("click", clicker)
+//state.canvas.removeEventListener("click", clicker)
 
   this.clearCanvas(
     this.cxScore,
@@ -457,7 +454,7 @@ class Dilo {
       newX = diloFigureRadius;
     }
     if (newX > canvasWidth - diloFigureRadius) {
-      newX = canvasWidth - diloFigureRadius;
+      newX = canvasWidth  - diloFigureRadius;
     };
     if (newY < diloFigureRadius) {
       newY = diloFigureRadius;
@@ -507,18 +504,8 @@ class Dilo {
     gameCanvas.cxCanvas.save();
 
     // tilt dilo sprite according to mouse position
-    let clientRect = gameCanvas.canvas.getBoundingClientRect()
-
-    let mouseX = mousePos.x - clientRect.left;
-    let mouseY = mousePos.y - clientRect.y;
-    
-    /* drawCenteredCircle(
-      gameCanvas.cxCanvas,
-      mouseX,
-      mouseY,
-      5,
-      "red"
-    ) */
+    let mouseX = mousePos.x - gameCanvas.canvasRect.x;
+    let mouseY = mousePos.y - gameCanvas.canvasRect.y;
 
     if (mousePos) {
       let diloAngleRad = Math.atan2(
@@ -537,8 +524,8 @@ class Dilo {
       0,
       diloSpriteWidth,
       diloSpriteHeight,
-      this.position.x - diloSizeObj.x/2,
-      this.position.y - diloSizeObj.y/2,
+      this.position.x,
+      this.position.y,
       diloSpriteWidth,
       diloSpriteHeight,
     )
@@ -793,7 +780,7 @@ function clickListener(gameCanvas) {
   //console.log(state.canvas)
   // calls bullet character class create method
   // remeber to convert event click with bounding rectangle thingamadoo
-  window.addEventListener("click", clicker)
+  gameCanvas.canvas.addEventListener("click", clicker)
 }
 
 
@@ -802,7 +789,7 @@ let counter = 0;
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
-
+  
   let gameCanvas = new GameCanvas(levelObj);
 
   let state = State.start(levelObj, levelsArray.length, levelIndex);
