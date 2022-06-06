@@ -6,7 +6,7 @@ let scaleMultiplier = 1.5,
   diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
-  levelScrollRate = 0.01,
+  levelScrollRate = 0.02,
   redBlock = "#f75b4a",
   backgroundColors = {
     0: "#000000",
@@ -304,13 +304,13 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
       `Limit block collisions to ${blockCollisionMax}`
     ]
 
-    this.cxCanvas.font = 'bold 25px serif';
+    this.cxCanvas.font = 15 * scaleMultiplier + "px wheaton";
     this.cxCanvas.textAlign = "left";
-    this.cxCanvas.fillStyle = scoreFontColor;
+    this.cxCanvas.fillStyle = "#FDFFDB";
     for (let rule of gameRules) {
 
       var blur = 5.5 * scaleMultiplier;
-      this.cxCanvas.shadowColor = "scoreFontColor";
+      this.cxCanvas.shadowColor = "white";
       this.cxCanvas.shadowBlur = blur;
       this.cxCanvas.fillText(rule, 10, this.canvas.height / 4 + ruleSpacer);
 

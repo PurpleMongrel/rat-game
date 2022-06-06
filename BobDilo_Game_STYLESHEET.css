@@ -10,9 +10,9 @@ body {
   display: block;
   cursor: crosshair;
   box-shadow: 
-    0 0 1px #fff,
-    0 0 2px #fff,
-    0 0 5px #fff,
+    0 0 1px #f84c4c,
+    0 0 2px #f84c4c,
+    0 0 5px #f84c4c,
     0 0 5px #910505,
     0 0 10px #910505,
     0 0 10px #910505,
@@ -29,9 +29,9 @@ body {
   display: block;
   background:  #2c1c63;
   box-shadow: 
-    0 0 1px #fff,
-    0 0 2px #fff,
-    0 0 5px #fff,
+    0 0 1px #f84c4c,
+    0 0 2px #f84c4c,
+    0 0 5px #f84c4c,
     0 0 5px #910505,
     0 0 10px #910505,
     0 0 10px #910505,
