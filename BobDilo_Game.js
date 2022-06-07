@@ -599,7 +599,7 @@ class BlackHole {
 //Charkeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of charkeys corresponds to a level (with colors of background elements changing)
 var charKeys = {
   0: {
-    "#": "#10A623",
+    "#": "#ffffcc",
     "*": "#FE9A39",
     ".": "empty",
     "D": Dilo,
