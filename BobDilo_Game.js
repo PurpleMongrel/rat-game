@@ -1,4 +1,4 @@
-let scaleMultiplier = 2,
+let scaleMultiplier = 1.2,
   pixelScale = 20 * scaleMultiplier,
   diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
@@ -586,11 +586,23 @@ class Bullet {
     return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration);
   }
 
-  update() { timeElapsed, state };
+  update(timeElapsed, state) {
+    this.position.y -= timeElapsed * 0.5;
+    return new Bullet(this.position,this.target,this.counter,this.duration)
+  };
 
   draw(gameCanvas) {
 
-
+    drawCenteredCircle(
+      gameCanvas.cxCanvas,
+      this.position.x,
+      this.position.y,
+      5,
+      "white",
+      "white",
+      10
+    )
+  
   }
 
   get type() {
@@ -662,7 +674,8 @@ var charKeys = {
 //Helper object - might be possible to clean up later
 var charTypes = {
   "bobDilo": Dilo,
-  "blackHole": BlackHole
+  "blackHole": BlackHole,
+  "bullet": Bullet
 }
 
 
@@ -822,20 +835,27 @@ function clicker(event) {
   //conditional if last bullet creation was not too recent
   //bullet = Bullet.create()
   //add bullet to state.characters
+  let diloPos = state.characters[0].position;
+  let bullet = Bullet.create(diloPos, mousePos);
+  
+  state.characters.push(bullet);
 
 }
 
 
-function clickListener(gameCanvas) {
+/* function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
   //console.log(state.canvas)
   // calls bullet character class create method
   // remeber to convert event click with bounding rectangle thingamadoo
   gameCanvas.canvas.addEventListener("click", clicker)
-}
+} */
+
+window.addEventListener("click", clicker)
 
 
 let counter = 0;
+let state;
 
 function runLevel(levelsArray, levelIndex) {
   charKey = charKeys[levelIndex];
@@ -843,12 +863,7 @@ function runLevel(levelsArray, levelIndex) {
 
   let gameCanvas = new GameCanvas(levelObj);
 
-  //Click listener added after creation of canvas elements with 'new Game Canvas'
-  clickListener(gameCanvas)
-
-  let state = State.start(levelObj, levelsArray.length, levelIndex);
-
-
+  state = State.start(levelObj, levelsArray.length, levelIndex);
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
