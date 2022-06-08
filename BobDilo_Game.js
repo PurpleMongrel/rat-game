@@ -1,4 +1,4 @@
-let scaleMultiplier = 1,
+let scaleMultiplier = 2,
   pixelScale = 20 * scaleMultiplier,
   diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
@@ -526,17 +526,6 @@ class Dilo {
     let mouseY = mousePos.y - gameCanvas.canvasRect.y;
     //let diloPosY = 
 
-    if (counter % 100 == 0) {
-      console.log("gameCanvas.canvasRect.x: :" + gameCanvas.canvasRect.x)
-      /* console.log("canvas rect: "+gameCanvas.canvasRect.x)
-      console.log("dilo: " + JSON.stringify(this.position));
-      console.log("mouse pos: "+ JSON.stringify(mousePos));
-      console.log(mousePos.x - gameCanvas.canvasRect.x );
-      console.log("mouseX: "+ mouseX)
-      console.log("end") */
-    }
-
-
     if (mousePos) {
       let diloAngleRad = Math.atan2(
         mouseY - this.position.y,
@@ -548,7 +537,7 @@ class Dilo {
         this.position.y
       )
       gameCanvas.cxCanvas.rotate(
-        diloAngleRad -= Math.PI / 2
+        diloAngleRad += Math.PI / 2
       );
       gameCanvas.cxCanvas.translate(
         -this.position.x,
@@ -765,12 +754,6 @@ class State {
 
   update(timeElapsed, state) {
 
-    /* if (counter % 300 == 0) {
-      console.log("dilo: " + JSON.stringify(state.characters[0]));
-      console.log("mouse pos: "+ JSON.stringify(mousePos));
-      console.log("mposx - canvasrect: " + mousePos.x - gameCanvas.canvasRect.x )
-    } */
-
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
 
     let newCharacters = [];
@@ -883,9 +866,7 @@ function runLevel(levelsArray, levelIndex) {
     ) {
 
       counter++;
-      /*  if (counter % 1000 == 0) {
-         console.log("dilo pos: "+ state.characters[0].pos)
-        } */
+
       //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
@@ -896,12 +877,12 @@ function runLevel(levelsArray, levelIndex) {
 
       }
 
-      let startScreenCounter = 500;
+      let startScreenCounter;
       if (
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
       ) {
-        startScreenCounter = 2000;
+        startScreenCounter = 500;
       }
 
       if (startScreenTimer > startScreenCounter) {
