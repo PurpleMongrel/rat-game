@@ -1,12 +1,12 @@
-let scaleMultiplier = 1.5,
+let scaleMultiplier = 1,
   pixelScale = 20 * scaleMultiplier,
-  diloFigureHeight = 1.4 * pixelScale * scaleMultiplier,
+  diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
   diloFigureRadius = 15 * scaleMultiplier,
   diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
-  levelScrollRate = 0.02,
+  levelScrollRate = 0.005,
   redBlock = "#f75b4a",
   backgroundColors = {
     0: "#000000",
@@ -25,8 +25,8 @@ let scaleMultiplier = 1.5,
   originalDiloAcceleration = 0.04,
   diloDeceleration = 0.04,
   diloMaxSpeed = 0.6,
-  bulletDuration = 1000;
-coinsNeededToWin = 0,
+  bulletDuration = 1000,
+  coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
@@ -219,6 +219,9 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
     this.scoreCanvas.width,
     this.scoreCanvas.height,
     "#2c1c63");
+
+  //updates canvasRect value every frame
+  this.canvasRect = this.canvas.getBoundingClientRect();
 
   this.drawScoreCanvas(state);
 
@@ -521,6 +524,18 @@ class Dilo {
     // tilt dilo sprite according to mouse position
     let mouseX = mousePos.x - gameCanvas.canvasRect.x;
     let mouseY = mousePos.y - gameCanvas.canvasRect.y;
+    //let diloPosY = 
+
+    if (counter % 100 == 0) {
+      console.log("gameCanvas.canvasRect.x: :" + gameCanvas.canvasRect.x)
+      /* console.log("canvas rect: "+gameCanvas.canvasRect.x)
+      console.log("dilo: " + JSON.stringify(this.position));
+      console.log("mouse pos: "+ JSON.stringify(mousePos));
+      console.log(mousePos.x - gameCanvas.canvasRect.x );
+      console.log("mouseX: "+ mouseX)
+      console.log("end") */
+    }
+
 
     if (mousePos) {
       let diloAngleRad = Math.atan2(
@@ -528,9 +543,17 @@ class Dilo {
         mouseX - this.position.x
       );
 
-      gameCanvas.cxCanvas.translate(this.position.x, this.position.y)
-      gameCanvas.cxCanvas.rotate(diloAngleRad += Math.PI / 2);
-      gameCanvas.cxCanvas.translate(-this.position.x, -this.position.y)
+      gameCanvas.cxCanvas.translate(
+        this.position.x,
+        this.position.y
+      )
+      gameCanvas.cxCanvas.rotate(
+        diloAngleRad -= Math.PI / 2
+      );
+      gameCanvas.cxCanvas.translate(
+        -this.position.x,
+        -this.position.y
+      )
     }
     //draw dilo sprite from png
     gameCanvas.cxCanvas.drawImage(
@@ -742,9 +765,11 @@ class State {
 
   update(timeElapsed, state) {
 
-    if (counter % 300 == 0) {
-      console.log(state);
-    }
+    /* if (counter % 300 == 0) {
+      console.log("dilo: " + JSON.stringify(state.characters[0]));
+      console.log("mouse pos: "+ JSON.stringify(mousePos));
+      console.log("mposx - canvasrect: " + mousePos.x - gameCanvas.canvasRect.x )
+    } */
 
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
 
@@ -835,12 +860,12 @@ function runLevel(levelsArray, levelIndex) {
 
   let gameCanvas = new GameCanvas(levelObj);
 
-//Click listener added after creation of canvas elements with 'new Game Canvas'
-clickListener(gameCanvas)
+  //Click listener added after creation of canvas elements with 'new Game Canvas'
+  clickListener(gameCanvas)
 
   let state = State.start(levelObj, levelsArray.length, levelIndex);
 
-  
+
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
@@ -858,7 +883,9 @@ clickListener(gameCanvas)
     ) {
 
       counter++;
-
+      /*  if (counter % 1000 == 0) {
+         console.log("dilo pos: "+ state.characters[0].pos)
+        } */
       //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
@@ -869,7 +896,7 @@ clickListener(gameCanvas)
 
       }
 
-      let startScreenCounter = 2000;
+      let startScreenCounter = 500;
       if (
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
