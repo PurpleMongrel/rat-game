@@ -25,7 +25,8 @@ let scaleMultiplier = 1.5,
   originalDiloAcceleration = 0.04,
   diloDeceleration = 0.04,
   diloMaxSpeed = 0.6,
-  coinsNeededToWin = 0,
+  bulletDuration = 1000;
+coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
@@ -192,9 +193,7 @@ let pressedKeys = {
 }
 
 class GameCanvas {
-  constructor(
-    level
-  ) {
+  constructor(level) {
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
@@ -563,6 +562,30 @@ class Dilo {
   }
 }
 
+class Bullet {
+  constructor(pos, target, counter, duration) {
+    this.position = pos;
+    this.target = target;
+    this.counter = counter;
+    this.duration = duration;
+  }
+
+  static create({ x, y }, { a, b }) {
+    return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration);
+  }
+
+  update() { timeElapsed, state };
+
+  draw(gameCanvas) {
+
+
+  }
+
+  get type() {
+    return "bullet"
+  }
+}
+
 //Poorly named blackhole character is a sparkling background element
 class BlackHole {
   constructor(pos) {
@@ -774,7 +797,8 @@ window.addEventListener("keyup", event => {
 
 let mousePos = { x: 0, y: 0 }
 
-//track mouse
+//track mouse movement updating position to mousePos object
+//scheduled
 window.addEventListener("mousemove", event => {
   let activated;
   if (!activated) {
@@ -785,11 +809,14 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
-
 function clicker(event) {
-
   console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
+  //conditional if last bullet creation was not too recent
+  //bullet = Bullet.create()
+  //add bullet to state.characters
+
 }
+
 
 function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
@@ -808,8 +835,12 @@ function runLevel(levelsArray, levelIndex) {
 
   let gameCanvas = new GameCanvas(levelObj);
 
+//Click listener added after creation of canvas elements with 'new Game Canvas'
+clickListener(gameCanvas)
+
   let state = State.start(levelObj, levelsArray.length, levelIndex);
-  clickListener(gameCanvas)
+
+  
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
