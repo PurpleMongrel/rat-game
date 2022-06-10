@@ -34,7 +34,7 @@ let scaleMultiplier = 1.2,
 
 diloSprites.src = "dilo_sprite.png"
 
-var charKey = 0;
+var levelKey = 0;
 
 //Creates a randomized "sparkling" of circles drawn around a point
 function sparkleEffect(
@@ -289,7 +289,7 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
 
   this.cxCanvas.strokeStyle = introFontColor;
 
-  this.cxCanvas.fillStyle = charKey["#"];
+  this.cxCanvas.fillStyle = levelKey["#"];
   var text = `Level ${state.gameData.level + 1}`;
   var blur = 5.5 * scaleMultiplier;
   this.cxCanvas.shadowColor = introFontColor;
@@ -352,13 +352,13 @@ GameCanvas.prototype.drawBackground = function (state) {
 
         if (color != "empty") {
 
-          if (color == charKey["*"]) {
+          if (color == levelKey["*"]) {
 
             shape = "circle";
             radius = pixelScale / 2;
           }
 
-          if (color == charKey["#"]) {
+          if (color == levelKey["#"]) {
 
             shape = "square";
             radius = pixelScale / 2;
@@ -391,7 +391,7 @@ GameCanvas.prototype.drawBackground = function (state) {
 GameCanvas.prototype.drawLevelPassed = function (state) {
   this.cxCanvas.font = 'bold 80px serif';
   this.cxCanvas.textAlign = "center";
-  this.cxCanvas.strokeStyle = charKey["#"]
+  this.cxCanvas.strokeStyle = levelKey["#"]
   this.cxCanvas.strokeText(`Level ${state.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
   this.cxCanvas.lineWidth = 1.5;
   this.cxCanvas.fillStyle = "#f75b4a"
@@ -649,8 +649,8 @@ class BlackHole {
   }
 }
 
-//Charkeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of charkeys corresponds to a level (with colors of background elements changing)
-var charKeys = {
+//levelKeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of levelKeys corresponds to a level (with colors of background elements changing)
+var levelKeys = {
   0: {
     "#": "#ffffcc",
     "*": "#FE9A39",
@@ -698,10 +698,10 @@ var Level = class Level {
 
       return row.map((char, x) => {
 
-        if (typeof charKey[char] == "string") return charKey[char];
+        if (typeof levelKey[char] == "string") return levelKey[char];
 
         else {
-          this.startingCharacters.unshift(charKey[char].create({ "x": x, "y": y }));
+          this.startingCharacters.unshift(levelKey[char].create({ "x": x, "y": y }));
           return "empty";
         }
       })
@@ -867,8 +867,9 @@ function clicker(event) {
 let counter = 0;
 let state;
 
+/* runLevel called by runGame f */
 function runLevel(levelsArray, levelIndex) {
-  charKey = charKeys[levelIndex];
+  levelKey = levelKeys[levelIndex];
   let levelObj = new Level(levelsArray[levelIndex]);
 
   let gameCanvas = new GameCanvas(levelObj);
@@ -979,7 +980,10 @@ function runLevel(levelsArray, levelIndex) {
   })
 }
 
-
+/* runGame called from HTML
+Calls await runLevel for each level in levelsArray. Keeps calling runLevel for current level untill runLevel resolves with value "won".
+Once runLevel promise returns "won", levelIndex++ a runLevel gets called with the next next level.
+Once last level returns promise resolved to value "won", the game is won and finished*/
 async function runGame(levelsArray) {
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray, levelIndex);
