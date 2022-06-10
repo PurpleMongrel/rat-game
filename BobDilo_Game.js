@@ -575,20 +575,26 @@ class Dilo {
 }
 
 class Bullet {
-  constructor(pos, target, counter, duration) {
+  constructor(pos, target, counter, duration, remove) {
     this.position = pos;
     this.target = target;
     this.counter = counter;
     this.duration = duration;
+    this.remove = remove;
   }
 
   static create({ x, y }, { a, b }) {
-    return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration);
+    return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration, false);
   }
 
-  update(timeElapsed, state) {
+  update(timeElapsed, state, index) {
     this.position.y -= timeElapsed * 0.5;
-    return new Bullet(this.position,this.target,this.counter,this.duration)
+    this.counter += timeElapsed;
+    if (this.counter > 400) {
+      this.remove = true;
+    }
+    return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
+
   };
 
   draw(gameCanvas) {
@@ -602,7 +608,7 @@ class Bullet {
       "white",
       10
     )
-  
+
   }
 
   get type() {
@@ -773,11 +779,19 @@ class State {
 
     for (let i = 0; i < this.characters.length; i++) {
 
-      let newChar = this.characters[i].update(timeElapsed, state);
+      let newChar = this.characters[i].update(timeElapsed, state, i);
 
-      newCharacters[i] = newChar;
+      //Make sure bullets who have expired do not get passed into updated state.characters
+      if (
+        newChar.type != "bullet"||
+      (newChar.type == "bullet" && newChar.remove == false)
+      ) {
+        newCharacters.push(newChar);
+      }
+      
+
     }
-
+  
     return new State(
       this.level,
       newCharacters,
@@ -837,11 +851,10 @@ function clicker(event) {
   //add bullet to state.characters
   let diloPos = state.characters[0].position;
   let bullet = Bullet.create(diloPos, mousePos);
-  
+
   state.characters.push(bullet);
 
 }
-
 
 /* function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
@@ -850,9 +863,6 @@ function clicker(event) {
   // remeber to convert event click with bounding rectangle thingamadoo
   gameCanvas.canvas.addEventListener("click", clicker)
 } */
-
-window.addEventListener("click", clicker)
-
 
 let counter = 0;
 let state;
@@ -864,6 +874,10 @@ function runLevel(levelsArray, levelIndex) {
   let gameCanvas = new GameCanvas(levelObj);
 
   state = State.start(levelObj, levelsArray.length, levelIndex);
+
+  console.log(gameCanvas)
+  gameCanvas.canvas.addEventListener("click", clicker);
+  console.log(gameCanvas)
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
