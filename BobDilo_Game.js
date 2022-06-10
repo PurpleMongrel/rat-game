@@ -25,7 +25,7 @@ let scaleMultiplier = 1.2,
   originalDiloAcceleration = 0.04,
   diloDeceleration = 0.04,
   diloMaxSpeed = 0.6,
-  bulletDuration = 1000,
+  bulletDuration = 800,
   coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
@@ -222,6 +222,7 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
 
   //updates canvasRect value every frame
   this.canvasRect = this.canvas.getBoundingClientRect();
+  canvasRect = this.canvas.getBoundingClientRect();
 
   this.drawScoreCanvas(state);
 
@@ -588,12 +589,22 @@ class Bullet {
   }
 
   update(timeElapsed, state, index) {
+<<<<<<< HEAD
     this.position.y -= timeElapsed * 0.5;
     this.counter += timeElapsed;
     if (this.counter > 400) {
       this.remove = true;
     }
     return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
+=======
+    this.position.y -= timeElapsed * 0.2;
+    let newCounter = this.counter += timeElapsed;
+    if (this.counter > this.duration) {
+      console.log("removed")
+      //this.remove = true;
+    }
+    return new Bullet(this.position, this.target, newCounter, this.duration, this.remove)
+>>>>>>> dcdaf5cd62e239c2e5ee200a296c114a8fd037a9
 
   };
 
@@ -777,8 +788,15 @@ class State {
 
     let newCharacters = [];
 
-    for (let i = 0; i < this.characters.length; i++) {
+    for (let char in this.characters) {
+      console.log("this.characters: ")
+      console.log(this.characters)
+      /* //console.log("this.characters.length: ", this.characters.length)
+      let newChar = this.characters[i].update(timeElapsed, state, i);
+      //console.log(i)
+      if (newChar.type == "bullet") console.log(newChar);
 
+<<<<<<< HEAD
       let newChar = this.characters[i].update(timeElapsed, state, i);
 
       //Make sure bullets who have expired do not get passed into updated state.characters
@@ -789,6 +807,20 @@ class State {
         newCharacters.push(newChar);
       }
       
+=======
+      //Make sure bullets who have expired do not get passed into updated state.characters
+      if (
+        newChar.type != "bullet" ||
+        (newChar.type == "bullet" && newChar.remove == false)
+      ) {
+        newCharacters.push(newChar);
+      } */
+      console.log(char)
+      let newChar = char.update(timeElapsed, state);
+      //console.log(newChar)
+      newCharacters.push(char)
+    }
+>>>>>>> dcdaf5cd62e239c2e5ee200a296c114a8fd037a9
 
     }
   
@@ -832,6 +864,8 @@ window.addEventListener("keyup", event => {
 
 let mousePos = { x: 0, y: 0 }
 
+let canvasRect;
+
 //track mouse movement updating position to mousePos object
 //scheduled
 window.addEventListener("mousemove", event => {
@@ -844,15 +878,23 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
-function clicker(event) {
+function clicker(event, gameCanvas) {
   console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
   //conditional if last bullet creation was not too recent
   //bullet = Bullet.create()
   //add bullet to state.characters
   let diloPos = state.characters[0].position;
+<<<<<<< HEAD
   let bullet = Bullet.create(diloPos, mousePos);
 
+=======
+  let mouseX = mousePos.x - canvasRect.x;
+  let mouseY = mousePos.y - canvasRect.y;
+  let bullet = Bullet.create({ "x": mouseX, "y": mouseY }, mousePos);
+>>>>>>> dcdaf5cd62e239c2e5ee200a296c114a8fd037a9
   state.characters.push(bullet);
+  console.log("pushed")
+  console.log(state.characters)
 
 }
 
@@ -875,9 +917,13 @@ function runLevel(levelsArray, levelIndex) {
 
   state = State.start(levelObj, levelsArray.length, levelIndex);
 
+<<<<<<< HEAD
   console.log(gameCanvas)
   gameCanvas.canvas.addEventListener("click", clicker);
   console.log(gameCanvas)
+=======
+
+>>>>>>> dcdaf5cd62e239c2e5ee200a296c114a8fd037a9
 
   let startScreenTimer = 0;
   backgroundBlocks = backgroundColors[levelIndex]
@@ -895,7 +941,7 @@ function runLevel(levelsArray, levelIndex) {
     ) {
 
       counter++;
-
+      //console.log(state.characters)
       //Uses time elapsed between frames to make animation smooth
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
@@ -903,7 +949,7 @@ function runLevel(levelsArray, levelIndex) {
 
       if (state.gameData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
-
+        gameCanvas.canvas.onclick = clicker;
       }
 
       let startScreenCounter;
@@ -920,6 +966,8 @@ function runLevel(levelsArray, levelIndex) {
 
       gameCanvas.syncCanvasToState(state);
       timePreviousFrame = timeCurrentFrame;
+
+      
 
       if (state.viewport.levelScroll < 30) {
 
