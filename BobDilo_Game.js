@@ -593,10 +593,22 @@ class Bullet {
   update(timeElapsed, state, index) {
     this.position.y -= timeElapsed * 0.5;
     this.counter += timeElapsed;
+    console.log(this.counter)
+    console.log(this.position)
     if (this.counter > 400) {
       this.remove = true;
     }
-    return Bullet.create(this.position, this.target, this.counter, this.duration, this.remove)
+    return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
+
+
+    /* this.position.y -= timeElapsed * 0.5;
+    this.counter += timeElapsed;
+    let newPos = {"x": this.position.x, "y": this.position.y - timeElapsed * 0.5};
+    let newCounter = this.counter += timeElapsed;
+    if (this.counter > 400) {
+      this.remove = true;
+    }
+    return Bullet.create(newPos, this.target, newCounter, this.duration, this.remove) */
 
   };
 
@@ -792,7 +804,7 @@ class State {
     for (let i = 0; i < this.characters.length; i++) {
 
       let newChar = this.characters[i].update(timeElapsed, state, i);
-
+if (newChar.type == "bullet") console.log(newChar.counter)
       //Make sure bullets who have expired do not get passed into updated state.characters
       if (
         newChar.type != "bullet" ||
@@ -924,19 +936,18 @@ function runLevel(levelsArray, levelIndex) {
       levelIntroTimer += timeElapsed;
 
       if (state.gameData.levelIntroDone == true) {
-        //state = state.update(timeElapsed, state)
-
+        state = state.update(timeElapsed, state)
       }
-      let startScreenCounter;
+      let levelIntroDuration;
 
       //levelIntroTimer situation seems unecessarily messy. Needs refactoring
       if (
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
       ) {
-        startScreenCounter = 500;
+        levelIntroDuration = 500;
       }
-      if (levelIntroTimer > startScreenCounter) {
+      if (levelIntroTimer > levelIntroDuration) {
         state.gameData.levelIntroDone = true;
       }
       gameCanvas.syncCanvasToState(state);
