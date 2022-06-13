@@ -282,6 +282,8 @@ GameCanvas.prototype.drawScoreCanvas = function (state) {
 }
 
 GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
+
+  //SHould check if I should use conditional to avoid extra caculation previous to state.gameData.level == 0 when level is not 0
   this.cxCanvas.font = introFontSize + "px wheaton";
 
   this.cxCanvas.lineWidth = 2.5 * scaleMultiplier;
@@ -793,15 +795,12 @@ class State {
 
       //Make sure bullets who have expired do not get passed into updated state.characters
       if (
-        newChar.type != "bullet"||
-      (newChar.type == "bullet" && newChar.remove == false)
+        newChar.type != "bullet" ||
+        (newChar.type == "bullet" && newChar.remove == false)
       ) {
         newCharacters.push(newChar);
       }
-      
-
     }
-  
     return new State(
       this.level,
       newCharacters,
@@ -862,7 +861,13 @@ function clicker(event) {
   //bullet = Bullet.create()
   //add bullet to state.characters
   let diloPos = state.characters[0].position;
-  newBullet = Bullet.create(diloPos, mousePos);
+  let bulletPos = {
+    'x':
+      mousePos.x - gameCanvas.canvasRect.x,
+    'y':
+      mousePos.y - gameCanvas.canvasRect.y
+  }
+  newBullet = Bullet.create(bulletPos, mousePos);
 
   state.characters.push(newBullet);
 
@@ -886,25 +891,24 @@ let gameCanvas;
 function runLevel(levelsArray, levelIndex) {
   levelKey = levelKeys[levelIndex];
   backgroundBlocks = backgroundColors[levelIndex]
-  
+
   let levelObj = new Level(levelsArray[levelIndex]);
 
-   gameCanvas = new GameCanvas(levelObj);
+  gameCanvas = new GameCanvas(levelObj);
 
   state = State.start(levelObj, levelsArray.length, levelIndex);
 
-  console.log(gameCanvas)
+  //Event listener shoots bullets on mouse click
   gameCanvas.canvas.addEventListener("click", clicker);
-  console.log(gameCanvas)
 
-  let startScreenTimer = 0;
-  
+  let levelIntroTimer = 0;
 
   //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
 
   //gameWonTimer used to implement pause to display "You Win!"" screen before canvas is cleared
   let gameWonTimer = 0;
+
   return new Promise((resolve) => {
     function frameAnimation(
       timeCurrentFrame,
@@ -914,28 +918,27 @@ function runLevel(levelsArray, levelIndex) {
 
       counter++;
 
-      //Uses time elapsed between frames to make animation smooth
+      //Keeps time elapsed at a 17ms maximum (between frames) for smooth animation
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
-      startScreenTimer += timeElapsed;
+      levelIntroTimer += timeElapsed;
 
       if (state.gameData.levelIntroDone == true) {
-        state = state.update(timeElapsed, state)
+        //state = state.update(timeElapsed, state)
 
       }
-
       let startScreenCounter;
+
+      //levelIntroTimer situation seems unecessarily messy. Needs refactoring
       if (
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
       ) {
         startScreenCounter = 500;
       }
-
-      if (startScreenTimer > startScreenCounter) {
+      if (levelIntroTimer > startScreenCounter) {
         state.gameData.levelIntroDone = true;
       }
-
       gameCanvas.syncCanvasToState(state);
       timePreviousFrame = timeCurrentFrame;
 
@@ -948,20 +951,16 @@ function runLevel(levelsArray, levelIndex) {
           state.status = "won";
         }
       }
-
       let endTimerControl = 1;
-
 
       if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-
 
       } else if (endTimer < endTimerControl) {
 
         if (state.status == "lost") {
           diloColor = "white"
         }
-
         state.scrollRate = 0;
         endTimer += 0.01;
 
