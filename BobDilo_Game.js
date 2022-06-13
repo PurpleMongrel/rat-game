@@ -204,6 +204,7 @@ class GameCanvas {
     this.cxScore = this.scoreCanvas.getContext("2d");
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
+    //there is global getBoundingClientRect, so eventually take this one out
     this.canvasRect = this.canvas.getBoundingClientRect();
     this.canvas.setAttribute("id", "canvas");
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
@@ -593,7 +594,7 @@ class Bullet {
     if (this.counter > 400) {
       this.remove = true;
     }
-    return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
+    return Bullet.create(this.position, this.target, this.counter, this.duration, this.remove)
 
   };
 
@@ -604,7 +605,7 @@ class Bullet {
       this.position.x,
       this.position.y,
       5,
-      "white",
+      "red",
       "white",
       10
     )
@@ -649,7 +650,10 @@ class BlackHole {
   }
 }
 
-//levelKeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of levelKeys corresponds to a level (with colors of background elements changing)
+/**
+ * levelKeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of levelKeys corresponds to a level (with colors of background elements changing) 
+ * Future change/improvement: swap out color values of '#' and '*' for string values 'block' and 'coin'. Might be best to turn coin into its own character class - collected coins would no longer have to be drawn transparently
+*/
 var levelKeys = {
   0: {
     "#": "#ffffcc",
@@ -677,7 +681,9 @@ var levelKeys = {
   }
 }
 
-//Helper object - might be possible to clean up later
+/**
+ * Helper object - might be possible to clean up later
+ */
 var charTypes = {
   "bobDilo": Dilo,
   "blackHole": BlackHole,
@@ -685,7 +691,9 @@ var charTypes = {
 }
 
 
-//Takes level plan string as input, and creates level object
+/**
+ * Takes level plan string as input, and creates level object 
+ * */
 var Level = class Level {
 
   constructor(levelString) {
@@ -714,6 +722,7 @@ var Level = class Level {
 
 class State {
 
+  //scrollRate should probably not be state property since it is a global variable as 'levelScrollRate'
   constructor(
     level,
     characters,
@@ -753,6 +762,7 @@ class State {
       canvasCharacters.push(character);
     }
 
+    //levelScrollRate should probably not be state property since it is a global variable
     return new State(
       level,
       canvasCharacters,
@@ -844,15 +854,17 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
+var newBullet;
+
 function clicker(event) {
   console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
   //conditional if last bullet creation was not too recent
   //bullet = Bullet.create()
   //add bullet to state.characters
   let diloPos = state.characters[0].position;
-  let bullet = Bullet.create(diloPos, mousePos);
+  newBullet = Bullet.create(diloPos, mousePos);
 
-  state.characters.push(bullet);
+  state.characters.push(newBullet);
 
 }
 
@@ -866,13 +878,18 @@ function clicker(event) {
 
 let counter = 0;
 let state;
+let gameCanvas;
 
-/* runLevel called by runGame f */
+/**
+ * runLevel called by runGame
+ */
 function runLevel(levelsArray, levelIndex) {
   levelKey = levelKeys[levelIndex];
+  backgroundBlocks = backgroundColors[levelIndex]
+  
   let levelObj = new Level(levelsArray[levelIndex]);
 
-  let gameCanvas = new GameCanvas(levelObj);
+   gameCanvas = new GameCanvas(levelObj);
 
   state = State.start(levelObj, levelsArray.length, levelIndex);
 
@@ -881,7 +898,7 @@ function runLevel(levelsArray, levelIndex) {
   console.log(gameCanvas)
 
   let startScreenTimer = 0;
-  backgroundBlocks = backgroundColors[levelIndex]
+  
 
   //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
@@ -980,10 +997,12 @@ function runLevel(levelsArray, levelIndex) {
   })
 }
 
-/* runGame called from HTML
-Calls await runLevel for each level in levelsArray. Keeps calling runLevel for current level untill runLevel resolves with value "won".
-Once runLevel promise returns "won", levelIndex++ a runLevel gets called with the next next level.
-Once last level returns promise resolved to value "won", the game is won and finished*/
+/**
+ * runGame called from HTML
+ * Calls await runLevel for each level in levelsArray. Keeps calling runLevel for current level untill runLevel resolves with value "won".
+ * Once runLevel promise returns "won", levelIndex++ a runLevel gets called with the next next level.
+ * Once last level returns promise resolved to value "won", the game is won and finished
+ * */
 async function runGame(levelsArray) {
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray, levelIndex);
