@@ -1,12 +1,12 @@
-let scaleMultiplier = 1.5,
+let scaleMultiplier = 1.2,
   pixelScale = 20 * scaleMultiplier,
-  diloFigureHeight = 1.4 * pixelScale * scaleMultiplier,
+  diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
   diloFigureRadius = 15 * scaleMultiplier,
-  diloSizeObj = { "x": 15 * scaleMultiplier, "y": 86 * scaleMultiplier },
+  diloSizeObj = { "x": 15 * scaleMultiplier, "y": 15 * scaleMultiplier },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
-  levelScrollRate = 0.02,
+  levelScrollRate = 0.005,
   redBlock = "#f75b4a",
   backgroundColors = {
     0: "#000000",
@@ -25,15 +25,16 @@ let scaleMultiplier = 1.5,
   originalDiloAcceleration = 0.04,
   diloDeceleration = 0.04,
   diloMaxSpeed = 0.6,
+  bulletDuration = 1000,
   coinsNeededToWin = 0,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
   diloSprites = document.createElement("img");
 
-diloSprites.src = "dilo_sprite.png"
+diloSprites.src = "images/dilo_sprite.png"
 
-var charKey = 0;
+var levelKey = 0;
 
 //Creates a randomized "sparkling" of circles drawn around a point
 function sparkleEffect(
@@ -51,8 +52,6 @@ function sparkleEffect(
     cx.shadowColor = shadowColor;
     cx.shadowBlur = shadowBlur;
     cx.fillStyle = fillStyle;
-
-    if (fillStyle != "green") console.log(fillStyle)
 
     let signX = 1;
     let signY = 1;
@@ -192,9 +191,7 @@ let pressedKeys = {
 }
 
 class GameCanvas {
-  constructor(
-    level
-  ) {
+  constructor(level) {
     this.canvas = document.createElement("canvas");
     this.canvas.width = level.width * pixelScale;
     this.canvas.height = 30 * pixelScale;
@@ -205,6 +202,7 @@ class GameCanvas {
     this.cxScore = this.scoreCanvas.getContext("2d");
     document.body.appendChild(this.scoreCanvas);
     document.body.appendChild(this.canvas);
+    //there is global getBoundingClientRect, so eventually take this one out
     this.canvasRect = this.canvas.getBoundingClientRect();
     this.canvas.setAttribute("id", "canvas");
     this.scoreCanvas.setAttribute("id", "scoreCanvas")
@@ -220,6 +218,9 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
     this.scoreCanvas.width,
     this.scoreCanvas.height,
     "#2c1c63");
+
+  //updates canvasRect value every frame
+  this.canvasRect = this.canvas.getBoundingClientRect();
 
   this.drawScoreCanvas(state);
 
@@ -279,6 +280,8 @@ GameCanvas.prototype.drawScoreCanvas = function (state) {
 }
 
 GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
+
+  //SHould check if I should use conditional to avoid extra caculation previous to state.gameData.level == 0 when level is not 0
   this.cxCanvas.font = introFontSize + "px wheaton";
 
   this.cxCanvas.lineWidth = 2.5 * scaleMultiplier;
@@ -287,7 +290,7 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
 
   this.cxCanvas.strokeStyle = introFontColor;
 
-  this.cxCanvas.fillStyle = charKey["#"];
+  this.cxCanvas.fillStyle = levelKey["#"];
   var text = `Level ${state.gameData.level + 1}`;
   var blur = 5.5 * scaleMultiplier;
   this.cxCanvas.shadowColor = introFontColor;
@@ -350,13 +353,13 @@ GameCanvas.prototype.drawBackground = function (state) {
 
         if (color != "empty") {
 
-          if (color == charKey["*"]) {
+          if (color == levelKey["*"]) {
 
             shape = "circle";
             radius = pixelScale / 2;
           }
 
-          if (color == charKey["#"]) {
+          if (color == levelKey["#"]) {
 
             shape = "square";
             radius = pixelScale / 2;
@@ -389,7 +392,7 @@ GameCanvas.prototype.drawBackground = function (state) {
 GameCanvas.prototype.drawLevelPassed = function (state) {
   this.cxCanvas.font = 'bold 80px serif';
   this.cxCanvas.textAlign = "center";
-  this.cxCanvas.strokeStyle = charKey["#"]
+  this.cxCanvas.strokeStyle = levelKey["#"]
   this.cxCanvas.strokeText(`Level ${state.gameData.level + 1}`, this.canvas.width / 2, this.canvas.height / 3, this.canvas.width);
   this.cxCanvas.lineWidth = 1.5;
   this.cxCanvas.fillStyle = "#f75b4a"
@@ -522,6 +525,7 @@ class Dilo {
     // tilt dilo sprite according to mouse position
     let mouseX = mousePos.x - gameCanvas.canvasRect.x;
     let mouseY = mousePos.y - gameCanvas.canvasRect.y;
+    //let diloPosY = 
 
     if (mousePos) {
       let diloAngleRad = Math.atan2(
@@ -529,9 +533,17 @@ class Dilo {
         mouseX - this.position.x
       );
 
-      gameCanvas.cxCanvas.translate(this.position.x, this.position.y)
-      gameCanvas.cxCanvas.rotate(diloAngleRad += Math.PI / 2);
-      gameCanvas.cxCanvas.translate(-this.position.x, -this.position.y)
+      gameCanvas.cxCanvas.translate(
+        this.position.x,
+        this.position.y
+      )
+      gameCanvas.cxCanvas.rotate(
+        diloAngleRad += Math.PI / 2
+      );
+      gameCanvas.cxCanvas.translate(
+        -this.position.x,
+        -this.position.y
+      )
     }
     //draw dilo sprite from png
     gameCanvas.cxCanvas.drawImage(
@@ -560,6 +572,58 @@ class Dilo {
 
   get type() {
     return "bobDilo"
+  }
+}
+
+class Bullet {
+  constructor(pos, target, counter, duration, remove) {
+    this.position = pos;
+    this.target = target;
+    this.counter = counter;
+    this.duration = duration;
+    this.remove = remove;
+  }
+
+  static create({ x, y }, { a, b }) {
+    return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration, false);
+  }
+
+  update(timeElapsed, state, index) {
+    this.position.y -= timeElapsed * 0.5;
+    this.counter += timeElapsed;
+    if (this.counter > 400) {
+      this.remove = true;
+    }
+    return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
+
+
+    /* this.position.y -= timeElapsed * 0.5;
+    this.counter += timeElapsed;
+    let newPos = {"x": this.position.x, "y": this.position.y - timeElapsed * 0.5};
+    let newCounter = this.counter += timeElapsed;
+    if (this.counter > 400) {
+      this.remove = true;
+    }
+    return Bullet.create(newPos, this.target, newCounter, this.duration, this.remove) */
+
+  };
+
+  draw(gameCanvas) {
+
+    drawCenteredCircle(
+      gameCanvas.cxCanvas,
+      this.position.x,
+      this.position.y,
+      5,
+      "red",
+      "white",
+      10
+    )
+
+  }
+
+  get type() {
+    return "bullet"
   }
 }
 
@@ -596,8 +660,11 @@ class BlackHole {
   }
 }
 
-//Charkeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of charkeys corresponds to a level (with colors of background elements changing)
-var charKeys = {
+/**
+ * levelKeys contains objects with key to values of each type of character encountered in the level plan strings. Each object of levelKeys corresponds to a level (with colors of background elements changing) 
+ * Future change/improvement: swap out color values of '#' and '*' for string values 'block' and 'coin'. Might be best to turn coin into its own character class - collected coins would no longer have to be drawn transparently
+*/
+var levelKeys = {
   0: {
     "#": "#ffffcc",
     "*": "#FE9A39",
@@ -624,14 +691,19 @@ var charKeys = {
   }
 }
 
-//Helper object - might be possible to clean up later
+/**
+ * Helper object - might be possible to clean up later
+ */
 var charTypes = {
   "bobDilo": Dilo,
-  "blackHole": BlackHole
+  "blackHole": BlackHole,
+  "bullet": Bullet
 }
 
 
-//Takes level plan string as input, and creates level object
+/**
+ * Takes level plan string as input, and creates level object 
+ * */
 var Level = class Level {
 
   constructor(levelString) {
@@ -644,10 +716,10 @@ var Level = class Level {
 
       return row.map((char, x) => {
 
-        if (typeof charKey[char] == "string") return charKey[char];
+        if (typeof levelKey[char] == "string") return levelKey[char];
 
         else {
-          this.startingCharacters.unshift(charKey[char].create({ "x": x, "y": y }));
+          this.startingCharacters.unshift(levelKey[char].create({ "x": x, "y": y }));
           return "empty";
         }
       })
@@ -660,6 +732,7 @@ var Level = class Level {
 
 class State {
 
+  //scrollRate should probably not be state property since it is a global variable as 'levelScrollRate'
   constructor(
     level,
     characters,
@@ -699,6 +772,7 @@ class State {
       canvasCharacters.push(character);
     }
 
+    //levelScrollRate should probably not be state property since it is a global variable
     return new State(
       level,
       canvasCharacters,
@@ -719,21 +793,24 @@ class State {
 
   update(timeElapsed, state) {
 
-    if (counter % 300 == 0) {
-      console.log(state);
-    }
-
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
 
     let newCharacters = [];
 
     for (let i = 0; i < this.characters.length; i++) {
 
-      let newChar = this.characters[i].update(timeElapsed, state);
-
-      newCharacters[i] = newChar;
+      let newChar = this.characters[i].update(timeElapsed, state, i);
+      
+if (newChar.type == "bullet") console.log(newChar.counter)
+      //Make sure bullets who have expired do not get passed into updated state.characters
+      if (
+        newChar.type != "bullet" ||
+        (newChar.type == "bullet" && newChar.remove == false)
+      ) {
+        newCharacters.push(newChar);
+      }
     }
-
+    //console.log(newCharacters)
     return new State(
       this.level,
       newCharacters,
@@ -774,7 +851,8 @@ window.addEventListener("keyup", event => {
 
 let mousePos = { x: 0, y: 0 }
 
-//track mouse
+//track mouse movement updating position to mousePos object
+//scheduled
 window.addEventListener("mousemove", event => {
   let activated;
   if (!activated) {
@@ -785,40 +863,62 @@ window.addEventListener("mousemove", event => {
   scheduled = true;
 })
 
+var newBullet;
 
 function clicker(event) {
-
   console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
+  //conditional if last bullet creation was not too recent
+  //bullet = Bullet.create()
+  //add bullet to state.characters
+  let diloPos = state.characters[0].position;
+  let bulletPos = {
+    'x':
+      mousePos.x - gameCanvas.canvasRect.x,
+    'y':
+      mousePos.y - gameCanvas.canvasRect.y
+  }
+  newBullet = Bullet.create(bulletPos, mousePos);
+console.log(newBullet)
+  state.characters.push(newBullet);
+
 }
 
-function clickListener(gameCanvas) {
+/* function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
   //console.log(state.canvas)
   // calls bullet character class create method
   // remeber to convert event click with bounding rectangle thingamadoo
   gameCanvas.canvas.addEventListener("click", clicker)
-}
-
+} */
 
 let counter = 0;
+let state;
+let gameCanvas;
 
+/**
+ * runLevel called by runGame
+ */
 function runLevel(levelsArray, levelIndex) {
-  charKey = charKeys[levelIndex];
+  levelKey = levelKeys[levelIndex];
+  backgroundBlocks = backgroundColors[levelIndex]
+
   let levelObj = new Level(levelsArray[levelIndex]);
 
-  let gameCanvas = new GameCanvas(levelObj);
+  gameCanvas = new GameCanvas(levelObj);
 
-  let state = State.start(levelObj, levelsArray.length, levelIndex);
-  clickListener(gameCanvas)
+  state = State.start(levelObj, levelsArray.length, levelIndex);
 
-  let startScreenTimer = 0;
-  backgroundBlocks = backgroundColors[levelIndex]
+  //Event listener shoots bullets on mouse click
+  gameCanvas.canvas.addEventListener("click", clicker);
+
+  let levelIntroTimer = 0;
 
   //endTimer used to implement pause to display level status between end of current level and start of next level (or "You Win!")
   let endTimer = 0;
 
   //gameWonTimer used to implement pause to display "You Win!"" screen before canvas is cleared
   let gameWonTimer = 0;
+
   return new Promise((resolve) => {
     function frameAnimation(
       timeCurrentFrame,
@@ -828,28 +928,26 @@ function runLevel(levelsArray, levelIndex) {
 
       counter++;
 
-      //Uses time elapsed between frames to make animation smooth
+      //Keeps time elapsed at a 17ms maximum (between frames) for smooth animation
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
-      startScreenTimer += timeElapsed;
+      levelIntroTimer += timeElapsed;
 
       if (state.gameData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
-
       }
+      let levelIntroDuration;
 
-      let startScreenCounter = 2000;
+      //levelIntroTimer situation seems unecessarily messy. Needs refactoring
       if (
         state.gameData.levelIntroDone == false &&
         state.gameData.level == 0
       ) {
-        startScreenCounter = 2000;
+        levelIntroDuration = 500;
       }
-
-      if (startScreenTimer > startScreenCounter) {
+      if (levelIntroTimer > levelIntroDuration) {
         state.gameData.levelIntroDone = true;
       }
-
       gameCanvas.syncCanvasToState(state);
       timePreviousFrame = timeCurrentFrame;
 
@@ -862,20 +960,16 @@ function runLevel(levelsArray, levelIndex) {
           state.status = "won";
         }
       }
-
       let endTimerControl = 1;
-
 
       if (state.status == "playing") {
         requestAnimationFrame(newTime => frameAnimation(newTime, timePreviousFrame, state))
-
 
       } else if (endTimer < endTimerControl) {
 
         if (state.status == "lost") {
           diloColor = "white"
         }
-
         state.scrollRate = 0;
         endTimer += 0.01;
 
@@ -911,7 +1005,12 @@ function runLevel(levelsArray, levelIndex) {
   })
 }
 
-
+/**
+ * runGame called from HTML
+ * Calls await runLevel for each level in levelsArray. Keeps calling runLevel for current level untill runLevel resolves with value "won".
+ * Once runLevel promise returns "won", levelIndex++ a runLevel gets called with the next next level.
+ * Once last level returns promise resolved to value "won", the game is won and finished
+ * */
 async function runGame(levelsArray) {
   for (let levelIndex = 0; levelIndex < levelsArray.length;) {
     let status = await runLevel(levelsArray, levelIndex);
