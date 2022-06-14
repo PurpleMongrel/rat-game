@@ -41,15 +41,15 @@ body {
 
 @font-face{
   font-family: "arcade";
-  src: url("fonts/ARCADECLASSIC.TTF") format("truetype");
+  src: url("../fonts/ARCADECLASSIC.TTF") format("truetype");
 }
 
 @font-face{
   font-family: "phreak";
-  src: url("fonts/VIDEOPHREAK.ttf") format("truetype");
+  src: url("../fonts/VIDEOPHREAK.ttf") format("truetype");
 }
 
 @font-face{
   font-family: "wheaton";
-  src: url("fonts/fonts/wheatonCapitals.otf") format("truetype");
+  src: url("../fonts/fonts/wheatonCapitals.otf") format("truetype");
 }
