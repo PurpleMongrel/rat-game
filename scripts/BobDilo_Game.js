@@ -213,11 +213,12 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
 
   //state.canvas.removeEventListener("click", clicker)
 
-  this.clearCanvas(
+  //Nothing Happens when I remove the code below... This should be checked out!
+/*   this.clearCanvas(
     this.cxScore,
     this.scoreCanvas.width,
     this.scoreCanvas.height,
-    "#2c1c63");
+    "#2c1c63"); */
 
   //updates canvasRect value every frame
   this.canvasRect = this.canvas.getBoundingClientRect();
@@ -226,6 +227,7 @@ GameCanvas.prototype.syncCanvasToState = function (state) {
 
   //update viewport
 
+  //remove clearCanvas below for little art experiments
   this.clearCanvas(
     this.cxCanvas,
     this.canvas.width,
@@ -615,7 +617,7 @@ class Bullet {
       this.position.x,
       this.position.y,
       5,
-      "red",
+      "#629473",
       "white",
       10
     )
@@ -800,20 +802,13 @@ class State {
     for (let i = 0; i < this.characters.length; i++) {
 
       let newChar = this.characters[i].update(timeElapsed, state, i);
-      
-if (newChar.type == "bullet") console.log(newChar.counter)
-      //Make sure bullets who have expired do not get passed into updated state.characters
-      if (
-        newChar.type != "bullet" ||
-        (newChar.type == "bullet" && newChar.remove == false)
-      ) {
-        newCharacters.push(newChar);
-      }
+
+      this.characters[i] = newChar;
     }
-    //console.log(newCharacters)
+
     return new State(
       this.level,
-      newCharacters,
+      this.characters,
       this.status,
       this.gameData,
       this.viewport.levelScroll,
@@ -865,23 +860,7 @@ window.addEventListener("mousemove", event => {
 
 var newBullet;
 
-function clicker(event) {
-  console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
-  //conditional if last bullet creation was not too recent
-  //bullet = Bullet.create()
-  //add bullet to state.characters
-  let diloPos = state.characters[0].position;
-  let bulletPos = {
-    'x':
-      mousePos.x - gameCanvas.canvasRect.x,
-    'y':
-      mousePos.y - gameCanvas.canvasRect.y
-  }
-  newBullet = Bullet.create(bulletPos, mousePos);
-console.log(newBullet)
-  state.characters.push(newBullet);
 
-}
 
 /* function clickListener(gameCanvas) {
   //let canvasElement = document.getElementById("canvas");
@@ -892,13 +871,14 @@ console.log(newBullet)
 } */
 
 let counter = 0;
-let state;
+
 let gameCanvas;
 
 /**
  * runLevel called by runGame
  */
 function runLevel(levelsArray, levelIndex) {
+  let state;
   levelKey = levelKeys[levelIndex];
   backgroundBlocks = backgroundColors[levelIndex]
 
@@ -907,6 +887,25 @@ function runLevel(levelsArray, levelIndex) {
   gameCanvas = new GameCanvas(levelObj);
 
   state = State.start(levelObj, levelsArray.length, levelIndex);
+
+  function clicker(event) {
+    console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
+    //conditional if last bullet creation was not too recent
+    //bullet = Bullet.create()
+    //add bullet to state.characters
+    let diloPos = state.characters[0].position;
+    let bulletPos = {
+      'x':
+        mousePos.x - gameCanvas.canvasRect.x,
+      'y':
+        mousePos.y - gameCanvas.canvasRect.y
+    }
+    newBullet = Bullet.create(bulletPos, mousePos);
+    //
+    console.log(newBullet)
+    state.characters.push(newBullet);
+
+  }
 
   //Event listener shoots bullets on mouse click
   gameCanvas.canvas.addEventListener("click", clicker);
@@ -932,6 +931,9 @@ function runLevel(levelsArray, levelIndex) {
       let timeElapsed = timeCurrentFrame - timePreviousFrame;
       if (timeElapsed > 17) timeElapsed = 17;
       levelIntroTimer += timeElapsed;
+
+      let charLength = state.characters.length
+      console.log({ charLength })
 
       if (state.gameData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
