@@ -797,11 +797,18 @@ class State {
 
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
 
-    let newCharacters = [];
-
     for (let i = 0; i < this.characters.length; i++) {
 
       let newChar = this.characters[i].update(timeElapsed, state, i);
+
+      if (newChar.type == "bullet") console.log(newChar.counter)
+      //Make sure bullets who have expired do not get passed into updated state.characters
+      if (
+        newChar.type != "bullet" ||
+        (newChar.type == "bullet" && newChar.remove == false)
+      ) {
+        newCharacters.push(newChar);
+      }
 
       this.characters[i] = newChar;
     }
