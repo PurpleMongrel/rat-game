@@ -123,6 +123,7 @@ function drawCenteredCircle(
   cx.fillStyle = fillStyle;
   cx.shadowColor = shadowColor;
   cx.shadowBlur = shadowBlur;
+  cx.beginPath();
   cx.arc(
     xPos,
     yPos,
