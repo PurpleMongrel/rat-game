@@ -6,7 +6,7 @@ let scaleMultiplier = 1.2,
   diloSizeObj = { "x": 15 * scaleMultiplier, "y": 15 * scaleMultiplier },
   diloMoveRate = 0.05,
   originaldiloMoveRate = 0.05,
-  levelScrollRate = 0.005,
+  levelScrollRate = 0.05,
   redBlock = "#f75b4a",
   backgroundColors = {
     0: "#000000",
@@ -942,7 +942,7 @@ function runLevel(levelsArray, levelIndex) {
       if (state.gameData.levelIntroDone == true) {
         state = state.update(timeElapsed, state)
       }
-      let levelIntroDuration;
+      let levelIntroDuration = 0;
 
       //levelIntroTimer situation seems unecessarily messy. Needs refactoring
       if (
