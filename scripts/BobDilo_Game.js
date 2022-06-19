@@ -589,11 +589,38 @@ class Bullet {
 
   static create({ x, y }, target) {
     console.log(x)
-    return new Bullet({ "x": x, "y": y },target, 0, bulletDuration, false);
+    return new Bullet({ "x": x, "y": y }, target, 0, bulletDuration, false);
   }
 
+  /**
+   * Calculate distance from bullet origin to target
+   * Calculate time bullet should take for trajectory
+   * Discover how much x and y should increment per frame. steps = Time/17 (17 is approximate duration of each animation frame | steps is number of frames it'll take for bullet to cover distance)
+   * X step increment is x distance to be travelled divided by steps
+   * Y step increment is y distance to be travelled divided by steps
+   */
   update(timeElapsed, state, index) {
-    this.position.y -= timeElapsed * 0.5;
+    //this.position.y -= timeElapsed * 0.5;
+
+    /**
+     * x/yBackwards account for if x or y is decreasing in value (going in "opposite" direction)
+     * value initialized as 1 does nothing. If x or y is going in opposite direction, x/yBackwards is changed to -1 to account for direction in calculation of frame step increments
+     */
+    let xBackwards = 1;
+    let yBackwards = 1;
+
+    // variables to make code easier to read
+    let xOrigin = this.position.x;
+    let yOrigin = this.position.y;
+    let xTarget =  this.target.x;
+    let yTarget =  this.target.x;
+
+
+    if (this.position.x > this.target.x) xBackwards = -1;
+    if (this.position.y > this.target.y) yBackwards = -1;
+
+    let bulletTravelDistance = (this.)
+
     this.counter += timeElapsed;
     if (this.counter > 400) {
       this.remove = true;
@@ -799,10 +826,10 @@ class State {
 
     this.viewport.levelScroll -= timeElapsed * state.scrollRate;
 
-   
 
-   // this.characters = filteredChar;
-   //console.log({filteredChar})
+
+    // this.characters = filteredChar;
+    //console.log({filteredChar})
 
     //Calls update method of each character in character array and assigns its return value to the character element
     for (let i = 0; i < this.characters.length; i++) {
@@ -815,7 +842,7 @@ class State {
       if (
         this.characters[i].type == "bullet" &&
         this.characters[i].remove == true
-      ){
+      ) {
         this.characters.splice(i, 1);
         i--;
         continue;
@@ -896,7 +923,7 @@ function runLevel(levelsArray, levelIndex) {
   state = State.start(levelObj, levelsArray.length, levelIndex);
 
   function clicker(event) {
-   //console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
+    //console.log(`Clicked x: ${event.pageX}, y: ${event.pageY}`)
     //conditional if last bullet creation was not too recent
     //bullet = Bullet.create()
     //add bullet to state.characters
@@ -907,9 +934,9 @@ function runLevel(levelsArray, levelIndex) {
       'y':
         mousePos.y - gameCanvas.canvasRect.y
     }
-    console.log({canvasMouse})
-    newBullet = Bullet.create(diloPos,canvasMouse);
-    console.log({newBullet})
+    console.log({ canvasMouse })
+    newBullet = Bullet.create(diloPos, canvasMouse);
+    console.log({ newBullet })
     state.characters.push(newBullet);
 
   }
