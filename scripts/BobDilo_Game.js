@@ -600,14 +600,14 @@ class Bullet {
    * Y step increment is y distance to be travelled divided by steps
    */
   update(timeElapsed, state, index) {
-    //this.position.y -= timeElapsed * 0.5;
+    this.position.y -= timeElapsed * 0.5;
 
     /**
-     * x/yBackwards account for if x or y is decreasing in value (going in "opposite" direction)
+     * x/yReverse account for if x or y is decreasing in value (going in "opposite" direction)
      * value initialized as 1 does nothing. If x or y is going in opposite direction, x/yBackwards is changed to -1 to account for direction in calculation of frame step increments
      */
-    let xBackwards = 1;
-    let yBackwards = 1;
+    let xReverse = 1;
+    let yReverse = 1;
 
     // variables to make code easier to read
     let xOrigin = this.position.x;
@@ -616,11 +616,15 @@ class Bullet {
     let yTarget =  this.target.x;
 
 
-    if (this.position.x > this.target.x) xBackwards = -1;
-    if (this.position.y > this.target.y) yBackwards = -1;
+    /* if (xOrigin > xTarget) xReverse = -1;
+    if (yOrigin > yTarget) yReverse = -1; */
 
-    let bulletTravelDistance = (this.)
+    let bulletTravelDistance = Math.sqrt(
+      ((xReverse)*(xTarget - xOrigin))**2 +
+      ((yReverse)*(yTarget - yOrigin))**2
+      )
 
+      console.log(bulletTravelDistance)
     this.counter += timeElapsed;
     if (this.counter > 400) {
       this.remove = true;
