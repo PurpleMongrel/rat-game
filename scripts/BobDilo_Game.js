@@ -587,8 +587,9 @@ class Bullet {
     this.remove = remove;
   }
 
-  static create({ x, y }, { a, b }) {
-    return new Bullet({ "x": x, "y": y }, { "x": a, "y": b }, 0, bulletDuration, false);
+  static create({ x, y }, target) {
+    console.log(x)
+    return new Bullet({ "x": x, "y": y },target, 0, bulletDuration, false);
   }
 
   update(timeElapsed, state, index) {
@@ -900,14 +901,15 @@ function runLevel(levelsArray, levelIndex) {
     //bullet = Bullet.create()
     //add bullet to state.characters
     let diloPos = state.characters[0].position;
-    let bulletPos = {
+    let canvasMouse = {
       'x':
         mousePos.x - gameCanvas.canvasRect.x,
       'y':
         mousePos.y - gameCanvas.canvasRect.y
     }
-    newBullet = Bullet.create(diloPos, mousePos);
-    
+    console.log({canvasMouse})
+    newBullet = Bullet.create(diloPos,canvasMouse);
+    console.log({newBullet})
     state.characters.push(newBullet);
 
   }
