@@ -600,7 +600,8 @@ class Bullet {
    * Y step increment is y distance to be travelled divided by steps
    */
   update(timeElapsed, state, index) {
-    this.position.y -= timeElapsed * 0.5;
+
+    //this.position.y -= timeElapsed * 0.8;
 
     /**
      * x/yReverse account for if x or y is decreasing in value (going in "opposite" direction)
@@ -612,21 +613,44 @@ class Bullet {
     // variables to make code easier to read
     let xOrigin = this.position.x;
     let yOrigin = this.position.y;
-    let xTarget =  this.target.x;
-    let yTarget =  this.target.x;
+    let xTarget = this.target.x;
+    let yTarget = this.target.y;
+    let xDistance = xTarget - xOrigin;
+    let yDistance = yTarget - yOrigin;
 
-
-    /* if (xOrigin > xTarget) xReverse = -1;
-    if (yOrigin > yTarget) yReverse = -1; */
+    if (xOrigin > xTarget) xReverse = -1;
+    if (yOrigin > yTarget) yReverse = -1;
 
     let bulletTravelDistance = Math.sqrt(
-      ((xReverse)*(xTarget - xOrigin))**2 +
-      ((yReverse)*(yTarget - yOrigin))**2
-      )
+      (xDistance) ** 2 +
+      (yDistance) ** 2
+    )
 
-      console.log(bulletTravelDistance)
+
+    let yDiff = yTarget - yOrigin;
+    let dilo = state.characters[0];
+
+    // bullet travel time is how many 17ms frames bullet should take to get from origin to target
+    let bulletTravelTime = bulletTravelDistance * 2 / 17;
+
+    //Amount to be added to x and y per frame
+    let xIncrement = xDistance / bulletTravelTime;
+    let yIncrement = yDistance / bulletTravelTime;
+
+    this.position.x += xIncrement;
+    this.position.y += yIncrement;
+
+    console.log({ yDiff })
+    console.log({ yOrigin })
+    console.log({ yTarget })
+    console.log(this)
+    console.log({ dilo })
+    console.log({ bulletTravelDistance })
+    console.log({ bulletTravelTime })
+    console.log('\n')
+
     this.counter += timeElapsed;
-    if (this.counter > 400) {
+    if (this.counter > 500) {
       this.remove = true;
     }
     return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
@@ -936,7 +960,7 @@ function runLevel(levelsArray, levelIndex) {
       'x':
         mousePos.x - gameCanvas.canvasRect.x,
       'y':
-        mousePos.y - gameCanvas.canvasRect.y
+        mousePos.y - gameCanvas.canvasRect.y/* - gameCanvas.scoreCanvas.height */
     }
     console.log({ canvasMouse })
     newBullet = Bullet.create(diloPos, canvasMouse);
