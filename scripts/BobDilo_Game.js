@@ -638,7 +638,7 @@ class Bullet {
     let yIncrement = yDistance / bulletTravelTime;
 
     this.position.x += xIncrement;
-    this.position.y += yIncrement;
+    this.position.y += (yIncrement +  (timeElapsed * state.scrollRate * pixelScale ));
 
     console.log({ yDiff })
     console.log({ yOrigin })
@@ -650,7 +650,7 @@ class Bullet {
     console.log('\n')
 
     this.counter += timeElapsed;
-    if (this.counter > 500) {
+    if (this.counter > 700) {
       this.remove = true;
     }
     return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
@@ -791,7 +791,10 @@ var Level = class Level {
 
 class State {
 
-  //scrollRate should probably not be state property since it is a global variable as 'levelScrollRate'
+  /**
+   *scrollRate should probably not be state property since it is a global variable as 'levelScrollRate
+   * 
+   * */
   constructor(
     level,
     characters,
