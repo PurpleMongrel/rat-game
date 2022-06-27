@@ -601,14 +601,7 @@ class Bullet {
    */
   update(timeElapsed, state, index) {
 
-    //this.position.y -= timeElapsed * 0.8;
-
-    /**
-     * x/yReverse account for if x or y is decreasing in value (going in "opposite" direction)
-     * value initialized as 1 does nothing. If x or y is going in opposite direction, x/yBackwards is changed to -1 to account for direction in calculation of frame step increments
-     */
-    let xReverse = 1;
-    let yReverse = 1;
+    this.position.y -= timeElapsed * 0.5;
 
     // variables to make code easier to read
     let xOrigin = this.position.x;
@@ -618,39 +611,49 @@ class Bullet {
     let xDistance = xTarget - xOrigin;
     let yDistance = yTarget - yOrigin;
 
-    if (xOrigin > xTarget) xReverse = -1;
-    if (yOrigin > yTarget) yReverse = -1;
+    //code bellow was used when bullets were tracking mouse click position
+    /**
+        * x/yReverse account for if x or y is decreasing in value (going in "opposite" direction)
+        * value initialized as 1 does nothing. If x or y is going in opposite direction, x/yBackwards is changed to -1 to account for direction in calculation of frame step increments
+        */
+    /* let xReverse = 1;
+    let yReverse = 1; */
 
-    let bulletTravelDistance = Math.sqrt(
-      (xDistance) ** 2 +
-      (yDistance) ** 2
-    )
-
-
-    let yDiff = yTarget - yOrigin;
-    let dilo = state.characters[0];
-
-    // bullet travel time is how many 17ms frames bullet should take to get from origin to target
-    let bulletTravelTime = bulletTravelDistance * 2 / 17;
-
-    //Amount to be added to x and y per frame
-    let xIncrement = xDistance / bulletTravelTime;
-    let yIncrement = yDistance / bulletTravelTime;
-
-    this.position.x += xIncrement;
-    this.position.y += (yIncrement +  (timeElapsed * state.scrollRate * pixelScale ));
-
-    console.log({ yDiff })
-    console.log({ yOrigin })
-    console.log({ yTarget })
-    console.log(this)
-    console.log({ dilo })
-    console.log({ bulletTravelDistance })
-    console.log({ bulletTravelTime })
-    console.log('\n')
+    /*  if (xOrigin > xTarget) xReverse = -1;
+     if (yOrigin > yTarget) yReverse = -1;
+ 
+     let bulletTravelDistance = Math.sqrt(
+       (xDistance) ** 2 +
+       (yDistance) ** 2
+     )
+ 
+     let yDiff = yTarget - yOrigin;
+     let dilo = state.characters[0];
+ 
+     // bullet travel time is how many 17ms frames bullet should take to get from origin to target
+     let bulletTravelTime = bulletTravelDistance * 2 / 17;
+ 
+     //Amount to be added to x and y per frame
+     let xIncrement = xDistance / bulletTravelTime;
+     let yIncrement = yDistance / bulletTravelTime;
+ 
+     this.position.x += xIncrement;
+    // this.position.y += (yIncrement + (timeElapsed * state.scrollRate * pixelScale));
+    this.position.y += yIncrement + 4
+     let incrementolio = timeElapsed * state.scrollRate * pixelScale
+ 
+     console.log({ incrementolio })
+     console.log({ yDiff })
+     console.log({ yOrigin })
+     console.log({ yTarget })
+     console.log(this)
+     console.log({ dilo })
+     console.log({ bulletTravelDistance })
+     console.log({ bulletTravelTime })
+     console.log('\n') */
 
     this.counter += timeElapsed;
-    if (this.counter > 700) {
+    if (this.counter > 1000) {
       this.remove = true;
     }
     return new Bullet(this.position, this.target, this.counter, this.duration, this.remove)
@@ -668,13 +671,16 @@ class Bullet {
   };
 
   draw(gameCanvas) {
-
+    let bulletColor = "#629473";
+    if (this.counter > 500) {
+      bulletColor = "red"
+    }
     drawCenteredCircle(
       gameCanvas.cxCanvas,
       this.position.x,
       this.position.y,
       5,
-      "#629473",
+      bulletColor,
       "white",
       10
     )
@@ -967,7 +973,15 @@ function runLevel(levelsArray, levelIndex) {
     }
     console.log({ canvasMouse })
     newBullet = Bullet.create(diloPos, canvasMouse);
-    console.log({ newBullet })
+    state.characters.push(newBullet);
+    newBullet = Bullet.create(
+      {"x": diloPos.x + 15, "y": diloPos.y},
+      canvasMouse
+      );
+    state.characters.push(newBullet);
+    newBullet = Bullet.create(
+      {"x": diloPos.x - 15, "y": diloPos.y},
+    canvasMouse);
     state.characters.push(newBullet);
 
   }
