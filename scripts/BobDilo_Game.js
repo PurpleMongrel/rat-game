@@ -327,7 +327,8 @@ GameCanvas.prototype.drawLevelIntroCanvas = function (state) {
     let ruleSpacer = 100;
     let gameRules = [
       `Move rat with arrows`,
-      `Aim vicious attacks with mouse`,
+      `Aim attacks with pointer`,
+      `click to shoot`,
       `Collect ${coinsNeededToWin} cheese coins`,
       `Limit block collisions to ${blockCollisionMax}`
     ]
