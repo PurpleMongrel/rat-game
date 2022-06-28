@@ -31,6 +31,8 @@ let scaleMultiplier = 1.2,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
   diloSprites = document.createElement("img"),
+  bulletExpirationTime = 600,
+  bulletExplosionTime = 400,
   bulletColors = {
     0: "1132D1",
     1: "#FDFFDB",
@@ -41,8 +43,8 @@ let scaleMultiplier = 1.2,
   bulletShadowColors = {
     0: "white",
     1: "#1132D1",
-    2: "#FDFFDB",
-    3: "white",
+    2: "white",
+    3: "#28318b",
   },
   bulletExplodingSizes = {
     0: 7,
@@ -623,7 +625,10 @@ class Bullet {
    */
   update(timeElapsed, state, index) {
 
+    //xDrift math makes side bullets move slower for triangle formation
     this.position.y -= timeElapsed * 0.5 - (Math.abs(this.xDrift) * 3);
+
+    //Math fine tunes x-axis drift here - this could be calculated at bullet creation instead....
     this.position.x += this.xDrift * this.counter / 180;
 
     //code bellow was used when bullets were tracking mouse click position
@@ -670,7 +675,9 @@ class Bullet {
      */
 
     this.counter += timeElapsed;
-    if (this.counter > 600) {
+
+    //Makes bullets expire once counter reaches numver
+    if (this.counter > bulletExpirationTime) {
       this.remove = true;
     }
     return new Bullet(this.position, this.counter, this.duration, this.remove, this.xDrift)
@@ -690,22 +697,27 @@ class Bullet {
   draw(gameCanvas) {
     // let bulletColor = bulletFireColors[Math.floor(Math.random()* this.counter % 10)]
     //let bulletColor = "#E84222"
+
+    //Keeps bullet shadows flickering
     let shadowColor = bulletShadowColors[Math.floor(Math.random() * this.counter % 10)];
     let bulletSize;
     let bulletColor;
 
-    if (this.counter > 400) {
+    //cycles through bullet sizes in bulletExplodingSizes array once counter is over bulletExplosionTime
+    if (this.counter > bulletExplosionTime) {
       bulletSize = bulletExplodingSizes[Math.floor(Math.random() * this.counter % 10)]
     } else {
       bulletSize = 5
     }
 
-    if (this.counter > 400) {
+    //cycles through values in bulletColors array once counter is over certain number
+    if (this.counter > bulletExplosionTime) {
       bulletColor = bulletColors[Math.floor(Math.random() * this.counter % 10)]
     } else {
       bulletColor = "#1132D1"
     }
-    
+
+    //Multiple drawCenteredCircle calls to make shadows stronger. Must be very computationally inefficient so would like to find a better way
     drawCenteredCircle(
       gameCanvas.cxCanvas,
       this.position.x,
@@ -720,7 +732,7 @@ class Bullet {
       this.position.x,
       this.position.y,
       bulletSize,
-      "transparent",
+      "black",
       shadowColor,
       5
     )
@@ -729,7 +741,7 @@ class Bullet {
       this.position.x,
       this.position.y,
       bulletSize,
-      "transparent",
+      "black",
       shadowColor,
       8
     )
