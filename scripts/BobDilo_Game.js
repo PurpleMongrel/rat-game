@@ -30,7 +30,27 @@ let scaleMultiplier = 1.2,
   blockCollisionMax = 100,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
-  diloSprites = document.createElement("img");
+  diloSprites = document.createElement("img"),
+  bulletColors = {
+    0: "1132D1",
+    1: "#FDFFDB",
+    2: "#28318B",
+    3: "#1132D1",
+    4: "#1132D1"
+  },
+  bulletShadowColors = {
+    0: "white",
+    1: "#1132D1",
+    2: "#FDFFDB",
+    3: "white",
+  },
+  bulletExplodingSizes = {
+    0: 7,
+    1: 3,
+    3: 6,
+    4: 2,
+    5: 5
+  }
 
 diloSprites.src = "images/dilo_sprite.png"
 
@@ -603,8 +623,8 @@ class Bullet {
    */
   update(timeElapsed, state, index) {
 
-    this.position.y -= timeElapsed * 0.5;
-    this.position.x += this.xDrift;
+    this.position.y -= timeElapsed * 0.5 - (Math.abs(this.xDrift) * 3);
+    this.position.x += this.xDrift * this.counter / 180;
 
     //code bellow was used when bullets were tracking mouse click position
     /**
@@ -650,7 +670,7 @@ class Bullet {
      */
 
     this.counter += timeElapsed;
-    if (this.counter > 1000) {
+    if (this.counter > 600) {
       this.remove = true;
     }
     return new Bullet(this.position, this.counter, this.duration, this.remove, this.xDrift)
@@ -668,19 +688,52 @@ class Bullet {
   };
 
   draw(gameCanvas) {
-    let bulletColor = "#629473";
-    if (this.counter > 500) {
-      bulletColor = "red"
+    // let bulletColor = bulletFireColors[Math.floor(Math.random()* this.counter % 10)]
+    //let bulletColor = "#E84222"
+    let shadowColor = bulletShadowColors[Math.floor(Math.random() * this.counter % 10)];
+    let bulletSize;
+    let bulletColor;
+
+    if (this.counter > 400) {
+      bulletSize = bulletExplodingSizes[Math.floor(Math.random() * this.counter % 10)]
+    } else {
+      bulletSize = 5
     }
+
+    if (this.counter > 400) {
+      bulletColor = bulletColors[Math.floor(Math.random() * this.counter % 10)]
+    } else {
+      bulletColor = "#1132D1"
+    }
+    
     drawCenteredCircle(
       gameCanvas.cxCanvas,
       this.position.x,
       this.position.y,
-      5,
+      bulletSize,
       bulletColor,
-      "white",
-      10
+      shadowColor,
+      15
+    );
+    drawCenteredCircle(
+      gameCanvas.cxCanvas,
+      this.position.x,
+      this.position.y,
+      bulletSize,
+      "transparent",
+      shadowColor,
+      5
     )
+    drawCenteredCircle(
+      gameCanvas.cxCanvas,
+      this.position.x,
+      this.position.y,
+      bulletSize,
+      "transparent",
+      shadowColor,
+      8
+    )
+
 
   }
 
@@ -975,11 +1028,11 @@ function runLevel(levelsArray, levelIndex) {
 
     state.characters.push(newBullet);
 
-    newBullet = Bullet.create({ "x": diloPos.x + 15, "y": diloPos.y }, 0.8);
+    newBullet = Bullet.create({ "x": diloPos.x + 10, "y": diloPos.y }, 0.7);
 
     state.characters.push(newBullet);
 
-    newBullet = Bullet.create({ "x": diloPos.x - 15, "y": diloPos.y }, -0.8);
+    newBullet = Bullet.create({ "x": diloPos.x - 10, "y": diloPos.y }, -0.7);
 
     state.characters.push(newBullet);
   }
