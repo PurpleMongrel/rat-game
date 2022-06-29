@@ -1,4 +1,4 @@
-let scaleMultiplier = 1.2,
+let scaleMultiplier = 4.2,
   pixelScale = 20 * scaleMultiplier,
   diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
@@ -33,6 +33,7 @@ let scaleMultiplier = 1.2,
   diloSprites = document.createElement("img"),
   bulletExpirationTime = 600,
   bulletExplosionTime = 400,
+  bulletSize = 5 * scaleMultiplier;
   bulletColors = {
     0: "1132D1",
     1: "#FDFFDB",
@@ -47,11 +48,11 @@ let scaleMultiplier = 1.2,
     3: "#28318b",
   },
   bulletExplodingSizes = {
-    0: 7,
-    1: 3,
-    3: 6,
-    4: 2,
-    5: 5
+    0: 4 * scaleMultiplier,
+    1: 3 * scaleMultiplier,
+    3: 6 * scaleMultiplier,
+    4: 2 * scaleMultiplier,
+    5: 5 * scaleMultiplier
   }
 
 diloSprites.src = "images/dilo_sprite.png"
@@ -633,7 +634,12 @@ class Bullet {
     //Math fine tunes x-axis drift here - this could be calculated at bullet creation instead....
     this.position.x += this.xDrift * this.counter / 180;
 
-    /
+    /* //Check for bullet colliding with background
+    let collided = backgroundCollision(
+      { "x":this.position.x, "y": this.position.y },
+      ,
+      state
+    ); */
 
     //code bellow was used when bullets were tracking mouse click position
     /**
@@ -704,14 +710,14 @@ class Bullet {
 
     //Keeps bullet shadows flickering
     let shadowColor = bulletShadowColors[Math.floor(Math.random() * this.counter % 10)];
-    let bulletSize;
+    
     let bulletColor;
 
     //cycles through bullet sizes in bulletExplodingSizes array once counter is over bulletExplosionTime
     if (this.counter > bulletExplosionTime) {
       bulletSize = bulletExplodingSizes[Math.floor(Math.random() * this.counter % 10)]
     } else {
-      bulletSize = 5
+      bulletSize = 5 * scaleMultiplier
     }
 
     //cycles through values in bulletColors array once counter is over certain number
@@ -729,7 +735,7 @@ class Bullet {
       bulletSize,
       bulletColor,
       shadowColor,
-      15
+      13 * scaleMultiplier
     );
     drawCenteredCircle(
       gameCanvas.cxCanvas,
@@ -738,7 +744,7 @@ class Bullet {
       bulletSize,
       "black",
       shadowColor,
-      5
+      4  * scaleMultiplier
     )
     drawCenteredCircle(
       gameCanvas.cxCanvas,
@@ -747,7 +753,7 @@ class Bullet {
       bulletSize,
       "black",
       shadowColor,
-      8
+      7 * scaleMultiplier
     )
 
 
