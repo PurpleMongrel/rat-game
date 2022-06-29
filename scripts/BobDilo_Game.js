@@ -1,4 +1,4 @@
-let scaleMultiplier = 4.2,
+let scaleMultiplier = 1.2,
   pixelScale = 20 * scaleMultiplier,
   diloFigureHeight = 28 * scaleMultiplier,
   diloFigureWidth = 30 * scaleMultiplier,
@@ -634,12 +634,38 @@ class Bullet {
     //Math fine tunes x-axis drift here - this could be calculated at bullet creation instead....
     this.position.x += this.xDrift * this.counter / 180;
 
-    /* //Check for bullet colliding with background
+    //Check for bullet colliding with background
     let collided = backgroundCollision(
       { "x":this.position.x, "y": this.position.y },
-      ,
+      bulletSize,
       state
-    ); */
+    );
+
+    /**
+     * Below (from Dilo.update) needs to be modified for bullet.
+     * Block reactions to being collided with need to be d
+     * 
+     * */  
+    /* for (let block of collided) {
+
+      if (state.level.rows[block.row][block.column] != "collided") {
+
+        if (state.level.unparsedRows[block.row][block.column] == "#") {
+          state.gameData.blocksTouched++;
+
+          if (state.gameData.blocksTouched > blockCollisionMax) {
+            state.status = "lost";
+          }
+        }
+        if (state.level.unparsedRows[block.row][block.column] == "*") {
+          state.gameData.coinsCollected++;
+        }
+
+        state.level.rows[block.row][block.column] = "collided";
+      }
+    } */
+
+
 
     //code bellow was used when bullets were tracking mouse click position
     /**
