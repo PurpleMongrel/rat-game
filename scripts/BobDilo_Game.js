@@ -175,9 +175,10 @@ function characterCanvasConversion(characterObj, level, type) {
   return canvasCharacter
 }
 
-
-// Checks what background objects Dilo collides with and returns them in an array 
-// canvasPosObj and sizePosObj are in format {x: .., y: ..} 
+/**
+ * Checks what background objects Dilo collides with and returns them in an array
+ *  canvasPosObj and sizePosObj are in format {x: .., y: ..}
+*/
 function backgroundCollision(canvasPosObj, sizeObj, state) {
 
   let levelPosX = canvasPosObj.x / pixelScale;
@@ -631,6 +632,8 @@ class Bullet {
 
     //Math fine tunes x-axis drift here - this could be calculated at bullet creation instead....
     this.position.x += this.xDrift * this.counter / 180;
+
+    /
 
     //code bellow was used when bullets were tracking mouse click position
     /**
