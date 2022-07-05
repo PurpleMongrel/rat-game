@@ -27,7 +27,7 @@ let scaleMultiplier = 1.2,
   diloMaxSpeed = 0.6,
   bulletDuration = 1000,
   coinsNeededToWin = 0,
-  blockCollisionMax = 100,
+  blockCollisionMax = 10000,
   diloSpriteWidth = 30,
   diloSpriteHeight = 86,
   diloSprites = document.createElement("img"),
@@ -650,7 +650,7 @@ class Bullet {
 
 
 
-    for (let block of collided) {
+    for (let block of bulletCollided) {
 
       if (state.level.rows[block.row][block.column] != "collided") {
 
@@ -853,6 +853,15 @@ class BlackHole {
   get type() {
     return "blackHole"
   }
+}
+
+//Character class for blocks that have been hit by bullets - to be drawn over transparent background bullet
+class ExplodingBlock {
+  constructor(){}
+  update(){}
+  draw(){}
+  static create(){}
+  get type(){} //is this necessary?
 }
 
 /**
