@@ -523,19 +523,24 @@ class Dilo {
     //Sets status to lost if blocks touched exceeds blockCollisionMax 
     for (let block of collided) {
 
+      //if block collided has not been previously collided with
       if (state.level.rows[block.row][block.column] != "collided") {
 
+        // if block collided with is a background block, increment blocksTouched by +1
         if (state.level.unparsedRows[block.row][block.column] == "#") {
           state.gameData.blocksTouched++;
 
+          //Check if game exceded Dilo background block collisions. 
           if (state.gameData.blocksTouched > blockCollisionMax) {
             state.status = "lost";
           }
         }
+        //If collided block is a coin, increment coinsCollected 
         if (state.level.unparsedRows[block.row][block.column] == "*") {
           state.gameData.coinsCollected++;
         }
 
+        //Change collided block value to "collided" so correct color can be used in GameCanvas.prototype.drawBackground
         state.level.rows[block.row][block.column] = "collided";
       }
     }
@@ -642,6 +647,31 @@ class Bullet {
       state
     );
     console.log(bulletCollided)
+
+
+
+    for (let block of collided) {
+
+      if (state.level.rows[block.row][block.column] != "collided") {
+
+        if (state.level.unparsedRows[block.row][block.column] == "#") {
+          state.gameData.blocksTouched++;
+
+          if (state.gameData.blocksTouched > blockCollisionMax) {
+            state.status = "lost";
+          }
+        }
+        if (state.level.unparsedRows[block.row][block.column] == "*") {
+          state.gameData.coinsCollected++;
+        }
+
+        state.level.rows[block.row][block.column] = "bulletHit";
+      }
+      //if block touched by bullet has already been collided with
+      else {
+        state.level.rows[block.row][block.column] = "collidedAndBulletHit";
+      }
+    }
 
     /**
      * Below (from Dilo.update) needs to be modified for bullet.
