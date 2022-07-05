@@ -33,7 +33,8 @@ let scaleMultiplier = 1.2,
   diloSprites = document.createElement("img"),
   bulletExpirationTime = 600,
   bulletExplosionTime = 400,
-  bulletSize = 5 * scaleMultiplier;
+  bulletSize =  5 * scaleMultiplier;
+  bulletSizeObj = {"x": bulletSize, "y": bulletSize};
   bulletColors = {
     0: "1132D1",
     1: "#FDFFDB",
@@ -635,11 +636,12 @@ class Bullet {
     this.position.x += this.xDrift * this.counter / 180;
 
     //Check for bullet colliding with background
-    let collided = backgroundCollision(
+    let bulletCollided = backgroundCollision(
       { "x":this.position.x, "y": this.position.y },
-      bulletSize,
+      bulletSizeObj,
       state
     );
+    console.log(bulletCollided)
 
     /**
      * Below (from Dilo.update) needs to be modified for bullet.
